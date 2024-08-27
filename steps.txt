@@ -1,0 +1,31 @@
+npm install react reatc-dom
+
+npm create vite@latest
+projname : frontend
+framework: react
+variant: JavaScript
+
+cd frontend
+npm install
+npm run dev
+
+// adding MUI materia to project
+// emotion is default styling engine
+npm install @mui/material @emotion/react @emotion/styled
+
+// adding Robot font.
+npm install @fontsource/roboto
+
+// adding icons
+npm install @mui/icons-material
+
+src/componets
+Header.jsx
+Sidebar.jsx
+Content.jsx
+
+src/pages
+pages of sidebar items
+
+// setting up routing with react router
+npm install react-router-dom
