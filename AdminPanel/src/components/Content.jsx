@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 
-const Content = ({ open }) => {
+const Content = ({ open, children }) => {
   return (
     <Box
       component="main"
@@ -17,12 +17,9 @@ const Content = ({ open }) => {
       <Outlet>
 
       </Outlet>
-      <Typography variant="h4" gutterBottom>
-        Welcome to My Application
-      </Typography>
-      <Typography paragraph>
-        This is the main content area. Click on the menu icon to expand or collapse the sidebar. The layout adjusts accordingly.
-      </Typography>
+      <div className={`content ${open ? 'shifted':''}`}>
+        {children}
+      </div>
     </Box>
   );
 };

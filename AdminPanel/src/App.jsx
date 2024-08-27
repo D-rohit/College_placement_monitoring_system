@@ -5,7 +5,8 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Content from './components/Content';
 import Students from './pages/Students';
-
+import DashboardPage from './pages/DashboardPage';
+import Companies from './pages/Companies'
 import './App.css';
 
 function App() {
@@ -17,16 +18,22 @@ function App() {
 
   return (
     <Router>
-      <div className="App">
-      <Header handleDrawerToggle={handleDrawerToggle} />
-      
-      <Sidebar open={open} />
-     
-      <Content open={open}>
-        <Routes>
-          <Route path="/Students" element={<Students />} />
-        </Routes>
-      </Content>
+      <div className="app-container">
+        <div className='header-container'>
+          <Header handleDrawerToggle={handleDrawerToggle} />
+        </div>
+        <div className='sidebar-container'>
+          <Sidebar open={open} />
+        </div>
+        <div className='Content-container'>
+          <Content open={open}>
+          <Routes>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/companies" element={<Companies />} />
+            <Route path="/students" element={<Students />} />
+          </Routes>
+          </Content>
+        </div>
     </div>
     </Router>
   );
