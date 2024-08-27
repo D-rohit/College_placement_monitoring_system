@@ -29,3 +29,12 @@ pages of sidebar items
 
 // setting up routing with react router
 npm install react-router-dom
+
+// backend
+npm install express mysql2 cors
+
+//start server
+node server.js
+
+// frontend : exporting feture for student details
+npm install axios xlsx file-saver jsPDF
