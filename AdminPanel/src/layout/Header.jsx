@@ -1,13 +1,13 @@
-// src/components/Header.jsx
 import React from 'react';
 import {
   AppBar,
   Toolbar,
   IconButton,
   Typography,
-  Box
+  Box,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import { Mail as MailIcon } from '@mui/icons-material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const Header = ({ handleDrawerToggle }) => {
@@ -31,6 +31,9 @@ const Header = ({ handleDrawerToggle }) => {
         {/* Spacer */}
         <Box sx={{ flexGrow: 1 }} />
         {/* User Account Icon */}
+        <IconButton color="inherit">
+            <MailIcon />
+        </IconButton>
         <IconButton color="inherit">
           <AccountCircleIcon />
         </IconButton>
