@@ -1,9 +1,9 @@
 // Companies.js (main component)
 import React, { useState } from 'react';
 import { Container, Typography } from '@mui/material';
-import SearchBar from '../companiesComponents/SearchBar';
-import CompanyTable from '../companiesComponents/CompanyTable';
-import PlacedStudentsTable from '../companiesComponents/PlacedStudentsTable';
+import SearchBar from './companiesComponents/SearchBar';
+import CompanyTable from './companiesComponents/CompanyTable';
+import PlacedStudentsTable from './companiesComponents/PlacedStudentsTable';
 
 const Companies = () => {
   const [searchQuery, setSearchQuery] = useState('');

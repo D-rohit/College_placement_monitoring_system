@@ -1,10 +1,10 @@
 // Students.js
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, Paper, Button } from '@mui/material';
-import SearchBar from '../studentsComponents/SearchBar';
-import StudentTable from '../studentsComponents/StudentTable';
-import ExportButton from '../studentsComponents/ExportButton';
-import { students } from '../studentsComponents/data'; // Move the students data to a separate file
+import SearchBar from './studentsComponents/SearchBar';
+import StudentTable from './studentsComponents/StudentTable';
+import ExportButton from './studentsComponents/ExportButton';
+import { students } from './studentsComponents/data'; // Move the students data to a separate file
 
 const Students = () => {
   const [searchQuery, setSearchQuery] = useState('');

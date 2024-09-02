@@ -38,3 +38,8 @@ node server.js
 
 // frontend : exporting feture for student details
 npm install axios xlsx file-saver jsPDF
+
+// primeReact
+npm install primereact
+npm install primeicons --save
+        

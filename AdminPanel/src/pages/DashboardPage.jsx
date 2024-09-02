@@ -1,12 +1,12 @@
 // DashboardPage.js
 import React from 'react';
 import { Toolbar, Typography, Container, Grid } from '@mui/material';
-import SummaryCard from '../dashboardComponents/SummaryCard';
-import DepartmentWisePlacements from '../dashboardComponents/DepartmentWisePlacements';
-import PlacementTrend from '../dashboardComponents/PlacementTrend';
-import TopCompaniesByCTC from '../dashboardComponents/TopCompaniesByCTC';
-import CTCStats from '../dashboardComponents/CTCStats';
-import TopCompaniesByOffers from '../dashboardComponents/TopCompaniesByOffers';
+import SummaryCard from './dashboardComponents/SummaryCard';
+import DepartmentWisePlacements from './dashboardComponents/DepartmentWisePlacements';
+import PlacementTrend from './dashboardComponents/PlacementTrend';
+import TopCompaniesByCTC from './dashboardComponents/TopCompaniesByCTC';
+import CTCStats from './dashboardComponents/CTCStats';
+import TopCompaniesByOffers from './dashboardComponents/TopCompaniesByOffers';
 
 const DashboardPage = () => {
   const studentCount = 354;
