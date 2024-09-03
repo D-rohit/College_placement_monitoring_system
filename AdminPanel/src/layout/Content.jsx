@@ -1,6 +1,8 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { Outlet } from 'react-router-dom';
+import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
+import "primereact/resources/themes/lara-light-cyan/theme.css";
 
 const Content = ({ open, children }) => {
   return (
@@ -18,7 +20,11 @@ const Content = ({ open, children }) => {
 
       </Outlet>
       <div className={`content ${open ? 'shifted':''}`}>
+        <PrimeReactProvider>
         {children}
+        </PrimeReactProvider>
+        
+
       </div>
     </Box>
   );
