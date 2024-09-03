@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useEffect, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -12,17 +11,8 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { Tag } from 'primereact/tag';
 import { Checkbox } from 'primereact/checkbox';
-import studentData from '../studentsComponents/Data.jsx';
+import studentData from './studentsComponents/Data.jsx';
 import './Students.css'; // Import custom CSS
-=======
-// Students.js
-import React, { useState, useEffect } from 'react';
-import { Container, Typography, Paper, Button } from '@mui/material';
-import SearchBar from './studentsComponents/SearchBar';
-import StudentTable from './studentsComponents/StudentTable';
-import ExportButton from './studentsComponents/ExportButton';
-import { students } from './studentsComponents/data'; // Move the students data to a separate file
->>>>>>> 48855c10c4ba67a10f131fee0116623863e3282d
 
 const Students = () => {
     const emptyStudent = {
@@ -234,7 +224,6 @@ const Students = () => {
                     className="p-button-rounded p-button-info ml-2" 
                     onClick={() => setFilterDialog(true)}
                 />
-               
             </span>
         </div>
     );
@@ -446,6 +435,14 @@ const Students = () => {
             >
                 <div className="p-fluid">
                     <div className="p-field">
+                        <label htmlFor="name">Name</label>
+                        <InputText 
+                            id="name" 
+                            value={filters.name} 
+                            onChange={(e) => setFilters({...filters, name: e.target.value})} 
+                        />
+                    </div>
+                    <div className="p-field">
                         <label htmlFor="rollNumber">Roll Number</label>
                         <InputText 
                             id="rollNumber" 
@@ -527,3 +524,4 @@ const Students = () => {
 };
 
 export default Students;
+

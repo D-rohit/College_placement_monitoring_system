@@ -6,8 +6,8 @@ import 'primeicons/primeicons.css';
 import Header from './layout/Header';
 import Sidebar from './layout/Sidebar';
 import Content from './layout/Content';
-// import Students from './pages/Students';
-import StudentsDemo from './pages/StudentsDemo';
+import Students from './pages/Students';
+
 import DashboardPage from './pages/DashboardPage';
 import Companies from './pages/Companies'
 // import SignUp from './pages/SignUp';
@@ -34,8 +34,8 @@ function App() {
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/companies" element={<Companies />} />
-            {/* <Route path="/students" element={<Students />} /> */}
-            <Route path="/students" element={<StudentsDemo />} />
+            <Route path="/students" element={<Students />} />
+           
             {/* <Route path="/sign-up" element={<SignUp />} /> */}
           </Routes>
           </Content>
