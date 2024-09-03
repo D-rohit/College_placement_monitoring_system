@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router,Routes,Route } from 'react-router-dom';
-
+import 'primereact/resources/themes/saga-blue/theme.css';  // Theme CSS
+import 'primereact/resources/primereact.min.css';            // Core CSS
+import 'primeicons/primeicons.css';    
 import Header from './layout/Header';
 import Sidebar from './layout/Sidebar';
 import Content from './layout/Content';

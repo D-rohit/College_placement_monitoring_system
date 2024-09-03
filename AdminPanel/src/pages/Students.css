@@ -1,0 +1,160 @@
+/* Students.css */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+.table-container {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.table-wrapper {
+    flex: 1;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.table-container .p-button {
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.table-container .p-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.table-container .p-button:hover {
+    background-color: #0056b3;
+}
+
+.p-toolbar {
+    background-color: #ffffff;
+    color: #000000;
+    border: #000000;
+    border-radius: 4px;
+    
+}
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  table th {
+    background-color: #f2f2f2;
+  }
+  
+  table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  table tr:hover {
+    background-color: #ddd;
+  }
+.p-toolbar .p-button {
+    background-color: #fff;
+    border:  #007bff 2px solid ;
+    color: #007bff;
+    border-radius: 4px;
+    margin: 10px;
+
+}
+
+.p-toolbar .p-button:hover {
+    background-color: #f1f1f1;
+}
+
+.p-toolbar .p-button:focus {
+    outline: none;
+}
+
+.p-dialog {
+    border-radius: 8px;
+}
+
+.p-dialog .p-button {
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+}
+
+.p-dialog .p-button:hover {
+    background-color: #0056b3;
+}
+
+.field {
+    margin-bottom: 1rem;
+}
+
+.field label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.field .p-inputtext,
+.field .p-dropdown,
+.field .p-calendar,
+.field .p-inputnumber {
+    width: 100%;
+}
+
+.p-inputtext,
+.p-dropdown,
+.p-calendar,
+.p-inputnumber {
+    border-radius: 4px;
+}
+
+.p-inputtext:focus,
+.p-dropdown:focus,
+.p-calendar:focus,
+.p-inputnumber:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-color: #007bff;
+}
+
+.p-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+}
+
+.confirmation-content {
+    display: flex;
+    align-items: center;
+}
+
+.confirmation-content i {
+    color: #dc3545;
+}
+
+.p-checkbox {
+    display: flex;
+    align-items: center;
+}
