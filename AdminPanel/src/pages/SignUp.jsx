@@ -1,161 +1,133 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  FormControl,
-  FormLabel,
-  Grid,
-  Link,
-  Paper,
-} from '@mui/material';
-import { AccountCircle, Email, Lock } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import './SignUp.css'; 
+import pdeuLogo from '../photos/Pdeu_logo.jpeg'; // Import the logo
+import pdeuBuild from '../photos/pdpu_build.jpg';
 
-const InputField = ({ icon: Icon, label, name, type, value, onChange }) => (
-  <TextField
-    fullWidth
-    variant="outlined"
-    margin="normal"
-    required
-    label={label}
-    name={name}
-    type={type}
-    value={value}
-    onChange={onChange}
-    InputProps={{
-      startAdornment: <Icon color="action" sx={{ mr: 1 }} />,
-    }}
-  />
-);
-
-const SignUpForm = () => {
+const SignUp = ({ onLogin }) => {
+  const [isSignUp, setIsSignUp] = useState(true); // Toggle between Sign-Up and Login
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    role: 'student',
+    role: 'CDC Cell'
   });
+  const [error, setError] = useState('');
+  
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Here you would typically send the data to your backend
+    if (formData.email === 'test@example.com' && formData.password === 'password123') {
+      console.log(isSignUp ? 'Sign-Up Form submitted' : 'Login Form submitted', formData);
+      setFormData({ name: '', email: '', password: '', role: 'CDC Cell' });
+      setError('');
+      onLogin(); // Call the login function passed from App component
+      navigate('/'); // Redirect to the dashboard after login
+    } else {
+      setError('Invalid login credentials');
+    }
+  };
+
+  const toggleForm = () => {
+    setIsSignUp(!isSignUp); // Toggle between login and sign-up
+    setError('');
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Box component="img" src="/api/placeholder/80/80" alt="University Logo" sx={{ width: 80, height: 80, mb: 2 }} />
-      <Typography component="h1" variant="h5" gutterBottom>
-        Sign Up
-      </Typography>
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-        <InputField
-          icon={AccountCircle}
-          label="Name"
-          name="name"
-          type="text"
-          value={formData.name}
-          onChange={handleChange}
-        />
-        <InputField
-          icon={Email}
-          label="Email ID"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        <InputField
-          icon={Lock}
-          label="Password"
-          name="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-        <FormControl component="fieldset" margin="normal">
-          <FormLabel component="legend">Role</FormLabel>
-          <RadioGroup
-            aria-label="role"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            row
-          >
-            <FormControlLabel value="cdc" control={<Radio />} label="CDC Cell" />
-            <FormControlLabel value="student" control={<Radio />} label="Student" />
-          </RadioGroup>
-        </FormControl>
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-        >
-          Sign Up
-        </Button>
-        <Grid container justifyContent="flex-end">
-          <Grid item>
-            <Link href="#" variant="body2">
-              Forgot password?
-            </Link>
-          </Grid>
-        </Grid>
-      </Box>
-    </Paper>
+    <div className="signup-container">
+      <div className="form-section">
+        <img src={pdeuLogo} alt="PDEU Logo" className="pdeu-logo" />
+        <h2>{isSignUp ? 'SIGN-UP' : 'LOGIN'}</h2>
+        <form onSubmit={handleSubmit}>
+          {isSignUp && (
+            <div className="form-group">
+              <label>Name:</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter Your Name"
+                required
+              />
+            </div>
+          )}
+          <div className="form-group">
+            <label>Email ID:</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter College Id"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Password:</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter Password"
+              required
+            />
+            <a href="#" className="forgot-password">Forgot Password?</a>
+          </div>
+          {isSignUp && (
+            <div className="form-group">
+              <label>Role:</label>
+              <div className="role-options">
+                <label>
+                  <input
+                    type="radio"
+                    name="role"
+                    value="CDC Cell"
+                    checked={formData.role === 'CDC Cell'}
+                    onChange={handleChange}
+                  />
+                  CDC Cell
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="role"
+                    value="Student"
+                    checked={formData.role === 'Student'}
+                    onChange={handleChange}
+                  />
+                  Student
+                </label>
+              </div>
+            </div>
+          )}
+          <button type="submit" className="submit-btn">
+            {isSignUp ? 'SUBMIT' : 'LOGIN'}
+          </button>
+          {error && <p className="error">{error}</p>}
+        </form>
+        <p>
+          {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+          <button onClick={toggleForm} className="toggle-btn">
+            {isSignUp ? 'Login' : 'Sign Up'}
+          </button>
+        </p>
+      </div>
+      <div className="image-section">
+        <img src={pdeuBuild} alt="PDEU Building" className="pdeu-building" />
+      </div>
+    </div>
   );
 };
-
-const SignUp = () => (
-  <Grid container component="main" sx={{ height: '100vh' }}>
-    <Grid
-      item
-      xs={false}
-      sm={4}
-      md={7}
-      sx={{
-        backgroundImage: 'url(/api/placeholder/800/600)',
-        backgroundRepeat: 'no-repeat',
-        backgroundColor: (t) =>
-          t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        position: 'relative',
-      }}
-    >
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Typography component="h1" variant="h3" color="white" fontWeight="bold">
-          Pandit Deendayal Petroleum University
-        </Typography>
-      </Box>
-    </Grid>
-    <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-      <Container component="main" maxWidth="xs" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <SignUpForm />
-      </Container>
-    </Grid>
-  </Grid>
-);
 
 export default SignUp;
