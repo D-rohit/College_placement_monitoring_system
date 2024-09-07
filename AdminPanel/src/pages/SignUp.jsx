@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import './SignUp.css'; 
 import pdeuLogo from '../photos/Pdeu_logo.jpeg'; // Import the logo
 import pdeuBuild from '../photos/pdpu_build.jpg';
+import axios from 'axios';
 
 const SignUp = ({ onLogin }) => {
   const [isSignUp, setIsSignUp] = useState(true); // Toggle between Sign-Up and Login
@@ -24,18 +25,42 @@ const SignUp = ({ onLogin }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.email === 'test@example.com' && formData.password === 'password123') {
-      console.log(isSignUp ? 'Sign-Up Form submitted' : 'Login Form submitted', formData);
-      setFormData({ name: '', email: '', password: '', role: 'CDC Cell' });
-      setError('');
-      onLogin(); // Call the login function passed from App component
-      navigate('/'); // Redirect to the dashboard after login
+    if(isSignUp){
+    try {
+      const response = await axios.post('http://localhost:3000/',{
+        email:formData.email,
+        password:formData.password
+      });
+      if (response.status === 200) {
+        alert('Registration successful!');
+      } else {
+        throw new Error(response.data.message || 'Something went wrong');
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+
+    }else{
+      const data = await axios.post('http://localhost:3000/login',{
+        email:formData.email,
+        password:formData.password
+      });
+    
+    if (data.status === 400 || !data) {
+      window.alert('Invalid credentials');
     } else {
-      setError('Invalid login credentials');
+      if (data.data.token!=null&&data.data.token!=undefined){
+        localStorage.setItem('token', data.data.token);
+      }
+      onLogin()
+      navigate('/');
+    }
+    
     }
   };
+  
 
   const toggleForm = () => {
     setIsSignUp(!isSignUp); // Toggle between login and sign-up

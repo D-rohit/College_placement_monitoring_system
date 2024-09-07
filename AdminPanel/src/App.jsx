@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -22,6 +22,7 @@ function App() {
   };
 
   const handleLogin = () => {
+    
     setIsAuthenticated(true);
   };
 
