@@ -1,5 +1,5 @@
 // getallStudent
-[
+const getallStudent = [
     {
         "student_id": 1,
         "name": "John Doe",
@@ -417,3 +417,4 @@
         "optout": false
     },
   ]
+export default getallStudent;

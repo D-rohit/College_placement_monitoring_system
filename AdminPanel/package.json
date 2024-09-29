@@ -16,6 +16,7 @@
     "@mui/material": "^6.0.1",
     "axios": "^1.7.5",
     "chart.js": "^4.4.4",
+    "classnames": "^2.5.1",
     "file-saver": "^2.0.5",
     "primeicons": "^7.0.0",
     "primereact": "^10.8.2",

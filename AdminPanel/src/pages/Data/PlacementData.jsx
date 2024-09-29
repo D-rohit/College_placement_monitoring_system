@@ -1,5 +1,5 @@
 // getallplacement
-[
+const placementData = [
     {
         "placement_id": 1,
         "student_id": 1,
@@ -121,3 +121,4 @@
         "core_non_core": "non-core"
     }
 ]
+export default placementData;

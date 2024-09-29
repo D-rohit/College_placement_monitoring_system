@@ -1,5 +1,5 @@
 // getallCompanies
-[
+const companyData = [
     {
         "company_id": 1,
         "company_name": "Tech Innovators Inc.",
@@ -71,3 +71,4 @@
         "no_of_student_placed": 1
     }
 ]
+export default companyData;

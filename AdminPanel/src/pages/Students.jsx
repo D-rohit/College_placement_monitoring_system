@@ -217,7 +217,7 @@ const Students = () => {
                     type="search"
                     onInput={(e) => setGlobalFilter(e.target.value)}
                     placeholder="Search..."
-                    style={{ width: '500px' }}
+                    style={{ width: '500px'}}
                 />
                 <Button 
                     icon="pi pi-filter" 

@@ -1,0 +1,97 @@
+/* General styles for responsive layout */
+.datatable-crud-demo {
+    padding: 1rem;
+}
+
+.table-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.p-button {
+    margin: 0.5rem 0;
+}
+
+/* DataTable responsive layout */
+.p-datatable {
+    width: 100%;
+    /* overflow-x: auto; */
+}
+
+.p-datatable .p-datatable-header {
+    text-align: center;
+}
+
+.p-datatable-thead > tr > th,
+.p-datatable-tbody > tr > td {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/* Ensuring buttons and other elements scale on smaller screens */
+@media (max-width: 768px) {
+    .table-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .p-datatable {
+        font-size: 0.9rem;
+    }
+
+    .p-button {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+
+    .p-input-icon-left {
+        width: 100%;
+    }
+}
+
+/* Dialogs responsive layout */
+.p-dialog {
+    width: 100%;
+    max-width: 100%;
+}
+
+.p-dialog-header {
+    text-align: center;
+}
+
+.p-dialog .p-field {
+    margin: 1rem 0;
+}
+
+.p-fluid .p-field {
+    width: 100%;
+}
+
+/* Adjust Input fields for smaller screens */
+@media (max-width: 768px) {
+    .p-dialog {
+        width: 90%;
+        max-width: 90%;
+    }
+
+    .p-field {
+        margin-bottom: 0.5rem;
+    }
+
+    .p-fluid .p-field label {
+        font-size: 0.9rem;
+    }
+}
+
+/* Adjusting the buttons inside Dialog footer for responsiveness */
+.p-dialog-footer .p-button-text {
+    width: 100%;
+}
+
+.p-button.p-button-text {
+    margin-bottom: 0.5rem;
+}
+
