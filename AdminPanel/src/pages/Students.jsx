@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import  { useState, useEffect, useRef } from 'react';
+import axios from "axios";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
@@ -11,7 +12,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { Tag } from 'primereact/tag';
 import { Checkbox } from 'primereact/checkbox';
-import studentData from './studentsComponents/Data.jsx';
+// import studentData from './studentsComponents/Data.jsx';
 import './Students.css'; // Import custom CSS
 
 const Students = () => {
@@ -35,7 +36,7 @@ const Students = () => {
         remark: '',
         optout: false,
     };
-
+    let studentData={};
     const [students, setStudents] = useState([]);
     const [studentDialog, setStudentDialog] = useState(false);
     const [deleteStudentDialog, setDeleteStudentDialog] = useState(false);
@@ -73,8 +74,22 @@ const Students = () => {
         { label: 'ST', value: 'ST' },
     ];
 
-    useEffect(() => {
-        setStudents(studentData);
+    async function getData(){
+        
+        const token = localStorage.getItem("token");
+        studentData=await axios.get(
+            "http://localhost:3000/api/student/getAllStudents",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, // Passing the token in the Authorization header
+              },
+            }
+          )
+        studentData=studentData.data
+        setStudents(studentData)
+    }
+    useEffect( () => {
+        getData();
     }, []);
 
     const openNew = () => {
