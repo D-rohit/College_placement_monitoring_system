@@ -15,7 +15,7 @@ import Companies from './pages/Companies';
 import PlacedStudentsTable from './pages/companiesComponents/PlacedStudentsTable';
 import Students from './pages/Students';
 import Reports from './pages/Reports';
-
+import JobPosting from './pages/JobPosting';
 import './App.css';
 
 function App() {
@@ -65,6 +65,7 @@ function App() {
                 <Route path="/companies/:companyId/PlacedStudentsTable" element={<ProtectedRoute><PlacedStudentsTable/></ProtectedRoute>}/>
                 <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
                 <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                <Route path="/job-posting" element={<JobPosting />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Content>

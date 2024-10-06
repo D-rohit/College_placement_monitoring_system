@@ -1,0 +1,55 @@
+/* JobPosting.css */
+.card {
+    background: var(--surface-card);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.field {
+    margin-bottom: 1.5rem;
+}
+
+.font-bold {
+    font-weight: 600;
+}
+
+.p-dialog .p-dialog-content {
+    padding: 2rem;
+}
+
+.p-tag {
+    cursor: pointer;
+}
+
+.p-tag:hover {
+    opacity: 0.9;
+}
+
+.p-datatable .p-datatable-header {
+    background: transparent;
+    border: none;
+    padding: 1rem 0;
+}
+
+.p-inputtext {
+    width: 100%;
+}
+
+.grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.col-12 {
+    width: 100%;
+}
+
+.mt-1 {
+    margin-top: 0.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
+}
