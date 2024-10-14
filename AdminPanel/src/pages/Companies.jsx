@@ -214,14 +214,24 @@ const Companies = () => {
 
     const header = (
         <div className="table-header">
-            <h5 className="mx-0 my-1" >Manage Companies</h5>
-            <span className="p-input-icon-left">
-                <IconField iconPosition="left">
-                    <InputIcon className="pi pi-search"> </InputIcon>
-                    <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." style={{width:'500px'}}/>
-                </IconField>
-            </span>
-            <Button label="Filter" icon="pi pi-filter" className="p-button-secondary ml-2" onClick={openFilterDialog} style={{alignItems:'flex-end'}}/>
+            <h2>Manage Companies</h2>
+            <div className="search-filter-container">
+                <div className="search-input-wrapper">
+                    <InputText
+                        type="search"
+                        onInput={(e) => setGlobalFilter(e.target.value)}
+                        placeholder="Search companies..."
+                        className="search-input"
+                    />
+                    <i className="search-icon pi pi-search"></i>
+                </div>
+                <Button label="Filter" icon="pi pi-filter" className="filter-button" onClick={openFilterDialog} />
+            </div>
+            <div className="action-buttons">
+                <Button label="New" icon="pi pi-plus" className="p-button-outlined p-button-success" onClick={openNew} />
+                <Button label="Delete Selected" icon="pi pi-trash" className="p-button-outlined p-button-danger" onClick={confirmDeleteSelected} disabled={!selectedCompanies || !selectedCompanies.length} />
+                <Button label="Export CSV" icon="pi pi-upload" className="p-button-outlined p-button-help" onClick={exportCSV} />
+            </div>
         </div>
     );
 
@@ -262,38 +272,38 @@ const Companies = () => {
     };
 
     return (
-        <div className="datatable-crud-demo">
+        <div className="companies-page">
             <Toast ref={toast} />
-
             <div className="card">
-                <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-
-                <DataTable
-                  ref={dt}
-                  value={companies}
-                  selection={selectedCompanies}
-                  onSelectionChange={(e) => setSelectedCompanies(e.value)}
-                  dataKey="company_id" /* This helps React identify each row uniquely */
-                  paginator
-                  rows={10}
-                  rowsPerPageOptions={[5, 10, 25]}
-                  paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} companies"
-                  globalFilter={globalFilter}
-                  header={header}
-                  tableStyle={{ minWidth: '100%', width: '100%' , minWidth:'60rem'}}
-                  size={'small'}
-                  showGridlines
-                //   responsiveLayout="scroll"
-              >
-                  <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} exportable={false}></Column>
-                  <Column field="company_name" header="Name" sortable style={{ minWidth: '30%' }}></Column>
-                  <Column field="email" header="Email" sortable style={{ minWidth: '30%' }}></Column>
-                  <Column field="phone_number" header="Phone Number" sortable style={{ minWidth: '30%' }}></Column>
-                  <Column field="no_of_student_placed" header="Students Placed" sortable style={{ minWidth: '30%' }}></Column>
-                  <Column body={studentDetailsBodyTemplate} header="Student Details" />
-                  <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '30%' }}></Column>
-              </DataTable>
+                {header}
+                <div className="table-container">
+                    <DataTable
+                        ref={dt}
+                        value={companies}
+                        selection={selectedCompanies}
+                        onSelectionChange={(e) => setSelectedCompanies(e.value)}
+                        dataKey="company_id"
+                        paginator
+                        rows={10}
+                        rowsPerPageOptions={[5, 10, 25]}
+                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} companies"
+                        globalFilter={globalFilter}
+                        responsiveLayout="scroll"
+                        emptyMessage="No companies found."
+                        className="p-datatable-companies"
+                        scrollable
+                        scrollHeight="flex"
+                    >
+                        <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
+                        <Column field="company_name" header="Name" sortable style={{ minWidth: '150px' }} />
+                        <Column field="email" header="Email" sortable style={{ minWidth: '200px' }} />
+                        <Column field="phone_number" header="Phone Number" sortable style={{ minWidth: '150px' }} />
+                        <Column field="no_of_student_placed" header="Students Placed" sortable style={{ minWidth: '150px' }} />
+                        <Column body={studentDetailsBodyTemplate} header="Student Details" />
+                        <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '120px' }} />
+                    </DataTable>
+                </div>
             </div>
 
             <Dialog visible={companyDialog} style={{ width: '450px' }} header="Company Details" modal className="p-fluid" footer={companyDialogFooter} onHide={hideDialog}>

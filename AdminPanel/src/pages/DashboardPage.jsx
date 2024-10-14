@@ -1,12 +1,13 @@
 // DashboardPage.js
 import React from 'react';
-import { Toolbar, Typography, Container, Grid } from '@mui/material';
+import { Container, Grid } from '@mui/material';
 import SummaryCard from './dashboardComponents/SummaryCard';
 import DepartmentWisePlacements from './dashboardComponents/DepartmentWisePlacements';
 import PlacementTrend from './dashboardComponents/PlacementTrend';
 import TopCompaniesByCTC from './dashboardComponents/TopCompaniesByCTC';
 import CTCStats from './dashboardComponents/CTCStats';
 import TopCompaniesByOffers from './dashboardComponents/TopCompaniesByOffers';
+import { PrimeIcons } from 'primereact/api'; // Importing PrimeIcons
 
 const DashboardPage = () => {
   const studentCount = 354;
@@ -52,10 +53,10 @@ const DashboardPage = () => {
     <>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Grid container spacing={3}>
-          <SummaryCard title="Students" count={studentCount} />
-          <SummaryCard title="Companies" count={companiesCount} />
-          <SummaryCard title="Job Offers" count={jobOffersCount} />
-          <SummaryCard title="Placed Students" count={placedStudentsCount} />
+          <SummaryCard title="Students" count={studentCount} icon={PrimeIcons.USERS} />
+          <SummaryCard title="Companies" count={companiesCount} icon={PrimeIcons.BUILDING} />
+          <SummaryCard title="Job Offers" count={jobOffersCount} icon={PrimeIcons.BRIEFCASE} />
+          <SummaryCard title="Placed Students" count={placedStudentsCount} icon={PrimeIcons.CHECK} />
           <DepartmentWisePlacements data={departmentData} />
           <PlacementTrend data={placementTrendData} />
           <TopCompaniesByCTC companies={topCompanies} />

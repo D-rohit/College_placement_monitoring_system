@@ -7,7 +7,7 @@ import PlacedStudentsTable from './PlacedStudentsTable';
 import CompanyRoundTable from './CompanyRoundTable';
 import RoundWiseStudent from './RoundWiseStudent';
 import ManageStudents from './ManageStudents';
-import "/node_modules/primeflex/primeflex.css";
+// import "./node_modules/primeflex/primeflex.css";
 
 const MainCompany = () => {
 

@@ -4,6 +4,8 @@ import { Column } from 'primereact/column';
 import { Chart } from 'primereact/chart';
 import { Card } from 'primereact/card';
 import { Dropdown } from 'primereact/dropdown';
+import { Container, Grid } from '@mui/material'; // Importing MUI components
+import { PrimeIcons } from 'primereact/api'; // Importing PrimeIcons
 
 const Reports = () => {
     const [allStudents, setAllStudents] = useState([]);
@@ -164,76 +166,89 @@ const Reports = () => {
     };
 
     return (
-        <div className="p-4">
-            <div className="flex justify-content-between align-items-center mb-4">
-                <h2 className="text-2xl font-bold m-0">Placement Reports</h2>
-                <Dropdown 
-                    value={selectedYear} 
-                    options={yearOptions} 
-                    onChange={(e) => handleYearChange(e.value)} 
-                    placeholder="Select Year"
-                    className="w-200px"
-                />
-            </div>
-            
-            {/* Stats Card - Single Row */}
-            <div className="grid">
-                <div className="col-6">
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            <Grid container spacing={3}>
+                <Grid item xs={12}>
+                    <div className="flex justify-content-between align-items-center mb-4">
+                        <h2 className="text-2xl font-bold m-0">Placement Reports</h2>
+                        <Dropdown 
+                            value={selectedYear} 
+                            options={yearOptions} 
+                            onChange={(e) => handleYearChange(e.value)} 
+                            placeholder="Select Year"
+                            className="w-200px"
+                        />
+                    </div>
+                </Grid>
+
+                <Grid item xs={12} md={3}>
                     <Card className="shadow-1">
-                        <div className="flex flex-row justify-content-between align-items-center">
-                            <div className="text-center p-3">
-                                <h3 className="text-sm mb-2">Total Students</h3>
-                                <p className="text-2xl font-bold text-primary">{placementStats.totalStudents}</p>
-                            </div>
-                            <div className="text-center p-3">
-                                <h3 className="text-sm mb-2">Placed Students</h3>
-                                <p className="text-2xl font-bold text-green-500">{placementStats.placedStudents}</p>
-                            </div>
-                            <div className="text-center p-3">
-                                <h3 className="text-sm mb-2">Placement %</h3>
-                                <p className="text-2xl font-bold text-blue-500">
-                                    {placementStats.placementPercentage?.toFixed(1)}%
-                                </p>
-                            </div>
-                            <div className="text-center p-3">
-                                <h3 className="text-sm mb-2">Avg. Salary</h3>
-                                <p className="text-2xl font-bold text-orange-500">
-                                    ${placementStats.averageSalary?.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                </p>
-                            </div>
-                            <div className="text-center p-3">
-                                <h3 className="text-sm mb-2">Highest Salary</h3>
-                                <p className="text-2xl font-bold text-purple-500">
-                                    ${placementStats.highestSalary?.toLocaleString()}
-                                </p>
-                            </div>
+                        <div className="text-center p-3">
+                            <i className={`pi ${PrimeIcons.USERS} text-4xl mb-2`}></i>
+                            <h3 className="text-sm mb-2">Total Students</h3>
+                            <p className="text-2xl font-bold text-primary">{placementStats.totalStudents}</p>
                         </div>
                     </Card>
-                </div>
-            </div>
+                </Grid>
+                <Grid item xs={12} md={3}>
+                    <Card className="shadow-1">
+                        <div className="text-center p-3">
+                            <i className={`pi ${PrimeIcons.CHECK} text-4xl mb-2`}></i>
+                            <h3 className="text-sm mb-2">Placed Students</h3>
+                            <p className="text-2xl font-bold text-green-500">{placementStats.placedStudents}</p>
+                        </div>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} md={3}>
+                    <Card className="shadow-1">
+                        <div className="text-center p-3">
+                            <i className={`pi ${PrimeIcons.PERCENTAGE} text-4xl mb-2`}></i>
+                            <h3 className="text-sm mb-2">Placement %</h3>
+                            <p className="text-2xl font-bold text-blue-500">
+                                {placementStats.placementPercentage?.toFixed(1)}%
+                            </p>
+                        </div>
+                    </Card>
+                </Grid>
+                
+                <Grid item xs={12} md={3}>
+                    <Card className="shadow-1">
+                        <div className="text-center p-3">
+                            <i className={`pi ${PrimeIcons.DOLLAR} text-4xl mb-2`}></i>
+                            <h3 className="text-sm mb-2">Highest Salary</h3>
+                            <p className="text-2xl font-bold text-purple-500">
+                                ${placementStats.highestSalary?.toLocaleString()}
+                            </p>
+                        </div>
+                    </Card>
+                </Grid>
 
-            {/* Charts Row */}
-            <div className="grid mt-4">
-                <div className="col-12 lg:col-4">
-                    <Card title="Company Distribution">
-                        <Chart type="pie" data={companyChartData} options={chartOptions} style={{ height: '300px' }} />
+                <Grid item xs={12} md={4}>
+                    <Card className="shadow-1" sx={{ height: '400px' }}>
+                        <div className="p-3">
+                            <h3 className="text-sm mb-2">Company Distribution</h3>
+                            <Chart type="pie" data={companyChartData} options={chartOptions} style={{ height: '300px' }} />
+                        </div>
                     </Card>
-                </div>
-                <div className="col-12 lg:col-4">
-                    <Card title="Salary Distribution">
-                        <Chart type="bar" data={salaryChartData} options={chartOptions} style={{ height: '300px' }} />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <Card className="shadow-1" sx={{ height: '400px' }}>
+                        <div className="p-3">
+                            <h3 className="text-sm mb-2">Salary Distribution</h3>
+                            <Chart type="bar" data={salaryChartData} options={chartOptions} style={{ height: '300px' }} />
+                        </div>
                     </Card>
-                </div>
-                <div className="col-12 lg:col-4">
-                    <Card title="Department-wise Placement">
-                        <Chart type="bar" data={trendChartData} options={chartOptions} style={{ height: '300px' }} />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <Card className="shadow-1" sx={{ height: '400px' }}>
+                        <div className="p-3">
+                            <h3 className="text-sm mb-2">Department-wise Placement</h3>
+                            <Chart type="bar" data={trendChartData} options={chartOptions} style={{ height: '300px' }} />
+                        </div>
                     </Card>
-                </div>
-            </div>
+                </Grid>
 
-            {/* Data Table */}
-            <div className="grid mt-4">
-                <div className="col-12">
+                <Grid item xs={12}>
                     <Card title="Student Details">
                         <DataTable 
                             value={filteredStudents} 
@@ -257,9 +272,9 @@ const Reports = () => {
                             <Column field="placementDate" header="Placement Date" body={dateBodyTemplate} sortable />
                         </DataTable>
                     </Card>
-                </div>
-            </div>
-        </div>
+                </Grid>
+            </Grid>
+        </Container>
     );
 };
 

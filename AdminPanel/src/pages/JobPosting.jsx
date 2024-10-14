@@ -8,6 +8,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Badge } from 'primereact/badge';
 import { InputNumber } from 'primereact/inputnumber';
 import '../pages/JobPosting.css';
+
 const JobPosting = () => {
   // State for managing the application dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -55,8 +56,7 @@ const JobPosting = () => {
     setStudents(mockStudents);
     setFilteredStudents(mockStudents);
   }, []);
-   
- 
+
   const handleCreateApplication = () => {
     const eligibleStudents = students.filter(student => {
       return (
@@ -70,7 +70,7 @@ const JobPosting = () => {
 
     setFilteredStudents(eligibleStudents);
     setIsDialogOpen(false);
-    
+
     const newFilters = [];
     if (applicationForm.gender && applicationForm.gender !== 'all') {
       newFilters.push({ type: 'gender', value: applicationForm.gender, label: `Gender: ${applicationForm.gender}` });
@@ -87,10 +87,9 @@ const JobPosting = () => {
     if (applicationForm.numberOfBacklogs) {
       newFilters.push({ type: 'numberOfBacklogs', value: applicationForm.numberOfBacklogs, label: `Backlogs: ≤${applicationForm.numberOfBacklogs}` });
     }
-   
+
     // Add other filters similarly  
     setActiveFilters(newFilters);
-   
   };
 
   const removeFilter = (filterToRemove) => {
@@ -115,53 +114,29 @@ const JobPosting = () => {
     console.log('Sending emails to selected students');
   };
 
-  const columns = [
-    { accessorKey: 'name', header: 'Name' },
-    { accessorKey: 'rollNumber', header: 'Roll Number' },
-    { accessorKey: 'gender', header: 'Gender' },
-    { 
-      accessorKey: 'tenthPercentage', 
-      header: '10th %',
-      cell: ({ row }) => `${row.original.tenthPercentage}%`
-    },
-    { 
-      accessorKey: 'twelfthPercentage', 
-      header: '12th %',
-      cell: ({ row }) => `${row.original.twelfthPercentage}%`
-    },
-    { 
-      accessorKey: 'cpi', 
-      header: 'CPI',
-      cell: ({ row }) => row.original.cpi.toFixed(2)
-    },
-    { accessorKey: 'backlogs', header: 'Backlogs' },
-  ];
-
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Job Posting</h1>
-      
-      <div className="flex items-center justify-between gap-4">
-        <InputText
-          type="search"
-          placeholder="Search students..."
-          className="max-w-sm"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        
-        <div className="flex gap-2">
-          <Button onClick={() => setIsDialogOpen(true)}>
-            Create Application
-          </Button>
-          <Button variant="outline">
-            Export
-          </Button>
+    <div className="job-posting-page">
+      <h2>Job Posting</h2>
+      <div className="search-filter-container">
+        <div className="search-input-wrapper">
+          <InputText
+            type="search"
+            placeholder="Search students..."
+            className="search-input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <i className="search-icon pi pi-search"></i>
         </div>
+        <Button label="Create Application" icon="pi pi-plus" className="filter-button" onClick={() => setIsDialogOpen(true)} />
+      </div>
+      <div className="action-buttons">
+        <Button label="Send Email" icon="pi pi-envelope" onClick={handleSendEmail} />
+        <Button label="Export" icon="pi pi-upload" />
       </div>
 
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="applied-filters flex flex-wrap gap-2 mb-4">
           {activeFilters.map((filter, index) => (
             <Badge key={index} variant="secondary">
               {filter.label}
@@ -169,16 +144,16 @@ const JobPosting = () => {
                 className="ml-2"
                 onClick={() => removeFilter(filter)}
               >
-               
+                <i className="pi pi-times"></i>
               </button>
             </Badge>
           ))}
         </div>
       )}
 
-<DataTable value={filteredStudents} paginator rows={10} dataKey="id" 
-                 filters={{'global': { value: searchQuery, matchMode: 'contains' }}}
-                 globalFilterFields={['name', 'rollNumber']} emptyMessage="No eligible students found.">
+      <DataTable value={filteredStudents} paginator rows={10} dataKey="id"
+        filters={{ 'global': { value: searchQuery, matchMode: 'contains' } }}
+        globalFilterFields={['name', 'rollNumber']} emptyMessage="No eligible students found.">
         <Column field="name" header="Name" sortable />
         <Column field="rollNumber" header="Roll Number" sortable />
         <Column field="gender" header="Gender" sortable />
@@ -188,125 +163,118 @@ const JobPosting = () => {
         <Column field="backlogs" header="Backlogs" sortable />
       </DataTable>
 
-      <div className="flex justify-end">
-        <Button onClick={handleSendEmail}>
-          Send Email
-        </Button>
-      </div>
+      <Dialog
+        visible={isDialogOpen}
+        onHide={() => setIsDialogOpen(false)}
+        header="Create New Application"
+        className="w-full sm:w-4/5 md:w-2/3 lg:w-1/2 xl:w-2/5"
+        breakpoints={{ '960px': '75vw', '640px': '100vw' }}
+        style={{ maxWidth: '550px' }}
+      >
+        <div className="grid grid-cols-1 gap-4 p-4">
+          <div className="field">
+            <label htmlFor="companyName" className="font-bold block mb-2">Company Name</label>
+            <InputText
+              id="companyName"
+              value={applicationForm.companyName}
+              onChange={(e) => setApplicationForm({
+                ...applicationForm,
+                companyName: e.target.value
+              })}
+              className="w-full"
+            />
+          </div>
 
-      <Dialog 
-  visible={isDialogOpen} 
-  onHide={() => setIsDialogOpen(false)} 
-  header="Create New Application" 
-  className="w-full sm:w-4/5 md:w-2/3 lg:w-1/2 xl:w-2/5"
-  breakpoints={{'960px': '75vw', '640px': '100vw'}}
-  style={{ maxWidth: '550px' }}
->
-  <div className="grid grid-cols-1 gap-4 p-4">
-    <div className="field">
-      <label htmlFor="companyName" className="font-bold block mb-2">Company Name</label>
-      <InputText
-        id="companyName"
-        value={applicationForm.companyName}
-        onChange={(e) => setApplicationForm({
-          ...applicationForm,
-          companyName: e.target.value
-        })}
-        className="w-full"
-      />
-    </div>
+          <div className="field">
+            <label htmlFor="gender" className="font-bold block mb-2">Gender</label>
+            <Dropdown
+              id="gender"
+              value={applicationForm.gender}
+              options={[
+                { label: 'Male', value: 'male' },
+                { label: 'Female', value: 'female' },
+                { label: 'All', value: 'all' }
+              ]}
+              onChange={(e) => setApplicationForm({
+                ...applicationForm,
+                gender: e.value
+              })}
+              placeholder="Select gender"
+              className="w-full"
+            />
+          </div>
 
-    <div className="field">
-      <label htmlFor="gender" className="font-bold block mb-2">Gender</label>
-      <Dropdown
-        id="gender"
-        value={applicationForm.gender}
-        options={[
-          { label: 'Male', value: 'male' },
-          { label: 'Female', value: 'female' },
-          { label: 'All', value: 'all' }
-        ]}
-        onChange={(e) => setApplicationForm({
-          ...applicationForm,
-          gender: e.value
-        })}
-        placeholder="Select gender"
-        className="w-full"
-      />
-    </div>
+          <div className="field">
+            <label htmlFor="tenthPercentage" className="font-bold block mb-2">10th Percentage</label>
+            <InputNumber
+              id="tenthPercentage"
+              value={applicationForm.tenthPercentage}
+              onValueChange={(e) => setApplicationForm({
+                ...applicationForm,
+                tenthPercentage: e.value
+              })}
+              mode="decimal"
+              minFractionDigits={2}
+              maxFractionDigits={2}
+              suffix="%"
+              className="w-full"
+            />
+          </div>
 
-    <div className="field">
-      <label htmlFor="tenthPercentage" className="font-bold block mb-2">10th Percentage</label>
-      <InputNumber
-        id="tenthPercentage"
-        value={applicationForm.tenthPercentage}
-        onValueChange={(e) => setApplicationForm({
-          ...applicationForm,
-          tenthPercentage: e.value
-        })}
-        mode="decimal"
-        minFractionDigits={2}
-        maxFractionDigits={2}
-        suffix="%"
-        className="w-full"
-      />
-    </div>
+          <div className="field">
+            <label htmlFor="twelfthPercentage" className="font-bold block mb-2">12th Percentage</label>
+            <InputNumber
+              id="twelfthPercentage"
+              value={applicationForm.twelfthPercentage}
+              onValueChange={(e) => setApplicationForm({
+                ...applicationForm,
+                twelfthPercentage: e.value
+              })}
+              mode="decimal"
+              minFractionDigits={2}
+              maxFractionDigits={2}
+              suffix="%"
+              className="w-full"
+            />
+          </div>
 
-    <div className="field">
-      <label htmlFor="twelfthPercentage" className="font-bold block mb-2">12th Percentage</label>
-      <InputNumber
-        id="twelfthPercentage"
-        value={applicationForm.twelfthPercentage}
-        onValueChange={(e) => setApplicationForm({
-          ...applicationForm,
-          twelfthPercentage: e.value
-        })}
-        mode="decimal"
-        minFractionDigits={2}
-        maxFractionDigits={2}
-        suffix="%"
-        className="w-full"
-      />
-    </div>
+          <div className="field">
+            <label htmlFor="minimumCPI" className="font-bold block mb-2">Minimum CPI</label>
+            <InputNumber
+              id="minimumCPI"
+              value={applicationForm.minimumCPI}
+              onValueChange={(e) => setApplicationForm({
+                ...applicationForm,
+                minimumCPI: e.value
+              })}
+              mode="decimal"
+              minFractionDigits={2}
+              maxFractionDigits={2}
+              className="w-full"
+            />
+          </div>
 
-    <div className="field">
-      <label htmlFor="minimumCPI" className="font-bold block mb-2">Minimum CPI</label>
-      <InputNumber
-        id="minimumCPI"
-        value={applicationForm.minimumCPI}
-        onValueChange={(e) => setApplicationForm({
-          ...applicationForm,
-          minimumCPI: e.value
-        })}
-        mode="decimal"
-        minFractionDigits={2}
-        maxFractionDigits={2}
-        className="w-full"
-      />
-    </div>
-
-    <div className="field">
-      <label htmlFor="numberOfBacklogs" className="font-bold block mb-2">Number of Backlogs</label>
-      <InputNumber
-        id="numberOfBacklogs"
-        value={applicationForm.numberOfBacklogs}
-        onValueChange={(e) => setApplicationForm({
-          ...applicationForm,
-          numberOfBacklogs: e.value
-        })}
-        mode="decimal"
-        minFractionDigits={0}
-        maxFractionDigits={0}
-        className="w-full"
-      />
-    </div>
-  </div>
-  <div className="flex justify-end gap-2 mt-4 p-4 border-t border-gray-200">
-    <Button label="Cancel" icon="pi pi-times" onClick={() => setIsDialogOpen(false)} className="p-button-text" />
-    <Button label="Create" icon="pi pi-check" onClick={handleCreateApplication} autoFocus />
-  </div>
-</Dialog>
-
+          <div className="field">
+            <label htmlFor="numberOfBacklogs" className="font-bold block mb-2">Number of Backlogs</label>
+            <InputNumber
+              id="numberOfBacklogs"
+              value={applicationForm.numberOfBacklogs}
+              onValueChange={(e) => setApplicationForm({
+                ...applicationForm,
+                numberOfBacklogs: e.value
+              })}
+              mode="decimal"
+              minFractionDigits={0}
+              maxFractionDigits={0}
+              className="w-full"
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 mt-4 p-4 border-t border-gray-200">
+          <Button label="Cancel" icon="pi pi-times" onClick={() => setIsDialogOpen(false)} className="p-button-text" />
+          <Button label="Create" icon="pi pi-check" onClick={handleCreateApplication} autoFocus />
+        </div>
+      </Dialog>
     </div>
   );
 };

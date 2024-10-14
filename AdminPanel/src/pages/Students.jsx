@@ -304,7 +304,7 @@ const Students = () => {
         <div className="table-header">
             <h2>Manage Students</h2>
             <div className="search-filter-container">
-                <div className="search-input-wrapper">
+                <div className="search-input-wrapper"style={{ width: '40%' }}>
                     <InputText
                         value={searchValue}
                         onChange={(e) => {
@@ -349,9 +349,10 @@ const Students = () => {
                         globalFilter={globalFilter}
                         responsiveLayout="scroll"
                         emptyMessage="No students found."
-                        className="p-datatable-students"
+                        className="p-datatable-sm" // Add this class for similar styling
                         scrollable
-                        scrollHeight="flex"
+                        scrollHeight="400px" // Adjusted to match Reports.jsx
+                        stripedRows // Add this property for striped rows
                     >
                         <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
                         <Column field="name" header="Name" style={{ minWidth: '150px' }} />
