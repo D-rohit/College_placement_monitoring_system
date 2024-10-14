@@ -4,23 +4,20 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext'; // For global search
 import companyRoundData from './CompanyRoundData';
-import roundStudentsData from './roundStudentsData';
+import roundStudentsData from './RoundStudentsData';
 import getallStudent from '../Data/StudentsData';
 
 const RoundWiseStudent = ({ companyId }) => {
     
     const [selectedRound, setSelectedRound] = useState(null); // State for selected round
     const [filteredStudents, setFilteredStudents] = useState([]); // State for filtered students
-    const [globalFilter, setGlobalFilter] = useState(''); // State for global search
-
-    const filteredRounds = companyRoundData.filter((round) => round.company_id === companyId) // rounds for perticular company
-    // Dropdown options for Rounds
+    const [globalFilter, setGlobalFilter] = useState(''); 
+    const filteredRounds = companyRoundData.filter((round) => round.company_id === companyId) 
     const roundOptions = filteredRounds.map((round) => ({
         label: round.round_name,
         value: round.round_id
     }));
 
-    // Effect to filter students when a round is selected
     useEffect(() => {
         if (selectedRound) {
             const studentsInRound = roundStudentsData
