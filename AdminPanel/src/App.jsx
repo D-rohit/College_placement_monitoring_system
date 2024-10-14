@@ -4,7 +4,6 @@ import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 
-
 import Header from './layout/Header';
 import Sidebar from './layout/Sidebar';
 import Content from './layout/Content';
@@ -12,7 +11,8 @@ import Content from './layout/Content';
 import SignUp from './pages/SignUp'; // Import the AuthForm component we created earlier
 import DashboardPage from './pages/DashboardPage';
 import Companies from './pages/Companies';
-import PlacedStudentsTable from './pages/companiesComponents/PlacedStudentsTable';
+// import PlacedStudentsTable from './pages/companiesComponents/PlacedStudentsTable';
+import MainCompany from './pages/companiesComponents/MainCompany';
 import Students from './pages/Students';
 import Reports from './pages/Reports';
 
@@ -62,7 +62,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
                 <Route path="/companies" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
-                <Route path="/companies/:companyId/PlacedStudentsTable" element={<ProtectedRoute><PlacedStudentsTable/></ProtectedRoute>}/>
+                <Route path="/companies/:companyId/MainCompany" element={<ProtectedRoute><MainCompany/></ProtectedRoute>}/>
                 <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
                 <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to="/" replace />} />
