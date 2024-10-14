@@ -10,7 +10,7 @@ import { InputIcon } from 'primereact/inputicon';
 import * as XLSX from 'xlsx';
 
 import getallStudent from '../Data/StudentsData';
-import roundStudentsData from './roundStudentsData'; // the data where student-rounds are tracked
+import roundStudentsData from './RoundStudentsData'; // the data where student-rounds are tracked
 import companyRoundData from './CompanyRoundData'; // Assuming this holds the round details
 
 const ManageStudents = () => {

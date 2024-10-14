@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { Button } from 'primereact/button';
 import { useParams, useNavigate , useLocation} from 'react-router-dom';
 
-import PlacedStudentsTable from './PlacedStudentsTable';
-import CompanyRoundTable from './CompanyRoundTable';
-import RoundWiseStudent from './RoundWiseStudent';
-import ManageStudents from './ManageStudents';
+import PlacedStudentsTable from './PlacedStudentsTable.jsx';
+import CompanyRoundTable from './CompanyRoundTable.jsx';
+import RoundWiseStudent from './RoundWiseStudent.jsx';
+import ManageStudents from './ManageStudents.jsx';
 import "/node_modules/primeflex/primeflex.css";
 
 const MainCompany = () => {
