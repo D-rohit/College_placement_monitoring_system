@@ -60,6 +60,7 @@ const Students = () => {
         maxCPI: null,
         optout: null
     });
+    const [searchValue, setSearchValue] = useState('');
     
     const genderOptions = [
         { label: 'Male', value: 'male' },
@@ -223,25 +224,6 @@ const Students = () => {
         setStudents(studentData);
         setFilterDialog(false);
     };
-    const header = (
-        <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-            <h4 className="m-3">Manage Students</h4>
-            <span className="p-input-icon-left">
-                
-                <InputText
-                    type="search"
-                    onInput={(e) => setGlobalFilter(e.target.value)}
-                    placeholder="Search..."
-                    style={{ width: '500px'}}
-                />
-                <Button 
-                    icon="pi pi-filter" 
-                    className="p-button-rounded p-button-info ml-2" 
-                    onClick={() => setFilterDialog(true)}
-                />
-            </span>
-        </div>
-    );
     const filterDialogFooter = (
         <>
             <Button label="Apply" icon="pi pi-check" onClick={applyFilters} />
@@ -313,51 +295,87 @@ const Students = () => {
         </>
     );
     
-    return (
-        <div>
-            <h2>Students</h2>
-            <Toast ref={toast} />
-            <Toolbar className="mb-4" left={leftToolbarTemplate} />
-            {/* <div className="p-d-flex p-jc-between">
-                <Button icon="pi pi-chevron-left" className="p-button-rounded p-button-info" onClick={scrollLeft} />
-                <Button icon="pi pi-chevron-right" className="p-button-rounded p-button-info" onClick={scrollRight} />
-            </div> */}
-            <div ref={tableContainer} className="table-container">
-                <DataTable
-                    ref={dt}
-                    value={students}
-                    selection={selectedStudents}
-                    onSelectionChange={(e) => setSelectedStudents(e.value)}
-                    dataKey="student_id"
-                    paginator
-                    rows={10}
-                    rowsPerPageOptions={[10, 25, 50]}
-                    className="datatable-scroll"
-                    globalFilter={globalFilter}
-                    header={header}
-                >
-                    <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
-                    <Column field="name" header="Name" />
-                    <Column field="rollNumber" header="Roll Number" />
-                    <Column field="personal_email" header="Personal Email" />
-                    <Column field="college_email" header="College Email" />
-                    <Column field="phone_number" header="Phone Number" />
-                    <Column field="date_of_birth" header="Date of Birth" body={dobBodyTemplate} />
-                    <Column field="gender" header="Gender" body={(rowData) => rowData.gender} />
-                    <Column field="city" header="City" />
-                    <Column field="state" header="State" />
-                    <Column field="tenth_percentage" header="10th Percentage" body={(rowData) => percentageBodyTemplate(rowData, 'tenth_percentage')} />
-                    <Column field="twelfth_percentage" header="12th Percentage" body={(rowData) => percentageBodyTemplate(rowData, 'twelfth_percentage')} />
-                    <Column field="cpi_after_8th_sem" header="CPI after 8th Sem" body={(rowData) => percentageBodyTemplate(rowData, 'cpi_after_8th_sem')} />
-                    <Column field="category" header="Category" body={(rowData) => rowData.category} />
-                    <Column field="no_of_backlog" header="No of Backlogs" body={(rowData) => rowData.no_of_backlog} />
-                    <Column field="no_of_active_backlog" header="No of Active Backlogs" body={(rowData) => rowData.no_of_active_backlog} />
-                    <Column field="remark" header="Remark" />
-                    <Column field="optout" header="Optout" body={optoutBodyTemplate} />
-                    <Column header="Actions" body={actionBodyTemplate} />
-                </DataTable>
+    const clearSearch = () => {
+        setSearchValue('');
+        setGlobalFilter('');
+    };
+
+    const header = (
+        <div className="table-header">
+            <h2>Manage Students</h2>
+            <div className="search-filter-container">
+                <div className="search-input-wrapper">
+                    <InputText
+                        value={searchValue}
+                        onChange={(e) => {
+                            setSearchValue(e.target.value);
+                            setGlobalFilter(e.target.value);
+                        }}
+                        placeholder="Search students..."
+                        className="search-input"
+                    />
+                    <i className="search-icon pi pi-search"></i>
+                </div>
+                <button className="filter-button" onClick={() => setFilterDialog(true)}>
+                    <i className="pi pi-filter"></i>
+                    <span>Filter</span>
+                </button>
             </div>
-            <Dialog visible={studentDialog} style={{ width: '450px' }} header="Student Details" modal footer={studentDialogFooter} onHide={hideDialog}>
+            <div className="action-buttons">
+                <Button label="Add New Student" icon="pi pi-plus" className="p-button-outlined p-button-success" onClick={openNew} />
+                <Button label="Delete Selected" icon="pi pi-trash" className="p-button-outlined p-button-danger" onClick={confirmDeleteSelected} disabled={!selectedStudents.length} />
+                <Button label="Export CSV" icon="pi pi-upload" className="p-button-outlined p-button-help" onClick={exportCSV} />
+            </div>
+        </div>
+    );
+    
+    return (
+        <div className="students-page">
+            <Toast ref={toast} />
+            <div className="card">
+                {header}
+                <div className="table-container">
+                    <DataTable
+                        ref={dt}
+                        value={students}
+                        selection={selectedStudents}
+                        onSelectionChange={(e) => setSelectedStudents(e.value)}
+                        dataKey="student_id"
+                        paginator
+                        rows={10}
+                        rowsPerPageOptions={[5, 10, 25]}
+                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} students"
+                        globalFilter={globalFilter}
+                        responsiveLayout="scroll"
+                        emptyMessage="No students found."
+                        className="p-datatable-students"
+                        scrollable
+                        scrollHeight="flex"
+                    >
+                        <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
+                        <Column field="name" header="Name" style={{ minWidth: '150px' }} />
+                        <Column field="rollNumber" header="Roll Number" style={{ minWidth: '120px' }} />
+                        <Column field="personal_email" header="Personal Email" style={{ minWidth: '200px' }} />
+                        <Column field="college_email" header="College Email" style={{ minWidth: '200px' }} />
+                        <Column field="phone_number" header="Phone Number" style={{ minWidth: '150px' }} />
+                        <Column field="date_of_birth" header="Date of Birth" body={dobBodyTemplate} style={{ minWidth: '120px' }} />
+                        <Column field="gender" header="Gender" body={(rowData) => rowData.gender} style={{ minWidth: '100px' }} />
+                        <Column field="city" header="City" style={{ minWidth: '120px' }} />
+                        <Column field="state" header="State" style={{ minWidth: '120px' }} />
+                        <Column field="tenth_percentage" header="10th Percentage" body={(rowData) => percentageBodyTemplate(rowData, 'tenth_percentage')} style={{ minWidth: '130px' }} />
+                        <Column field="twelfth_percentage" header="12th Percentage" body={(rowData) => percentageBodyTemplate(rowData, 'twelfth_percentage')} style={{ minWidth: '130px' }} />
+                        <Column field="cpi_after_8th_sem" header="CPI after 8th Sem" body={(rowData) => percentageBodyTemplate(rowData, 'cpi_after_8th_sem')} style={{ minWidth: '150px' }} />
+                        <Column field="category" header="Category" body={(rowData) => rowData.category} style={{ minWidth: '120px' }} />
+                        <Column field="no_of_backlog" header="No of Backlogs" body={(rowData) => rowData.no_of_backlog} style={{ minWidth: '130px' }} />
+                        <Column field="no_of_active_backlog" header="No of Active Backlogs" body={(rowData) => rowData.no_of_active_backlog} style={{ minWidth: '160px' }} />
+                        <Column field="remark" header="Remark" style={{ minWidth: '150px' }} />
+                        <Column field="optout" header="Optout" body={optoutBodyTemplate} style={{ minWidth: '100px' }} />
+                        <Column header="Actions" body={actionBodyTemplate} style={{ minWidth: '120px' }} />
+                    </DataTable>
+                </div>
+            </div>
+            <Dialog visible={studentDialog} style={{ width: '500px' }} header="Student Details" modal footer={studentDialogFooter} onHide={hideDialog}>
                 <div className="p-fluid">
                     <div className="p-field">
                         <label htmlFor="name">Name</label>
@@ -539,4 +557,3 @@ const Students = () => {
 };
 
 export default Students;
-
