@@ -5,24 +5,23 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { Dialog } from 'primereact/dialog';
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import { Checkbox } from 'primereact/checkbox';
 import { classNames } from 'primereact/utils';
-import placementData from '../Data/PlacementData'; // Data of Placement (company + student)
-import getallStudent from '../Data/StudentsData';  // Students details
-import companyData from '../Data/CompanyData';
-import './PlacedStudentsTable';
-import { useParams, useNavigate } from 'react-router-dom';
-import 'primeicons/primeicons.css';  // PrimeIcons CSS for icons
 import 'primereact/resources/themes/lara-light-indigo/theme.css';  // PrimeReact theme
 import 'primereact/resources/primereact.min.css';  // PrimeReact CSS
+import 'primeicons/primeicons.css';  // PrimeIcons CSS for icons
 
+import placementData from '../Data/PlacementData'; // Data of Placement (company + student)
+import getallStudent from '../Data/StudentsData';  // Students details
+import './PlacedStudentsTable';
 
-
-const PlacedStudentsTable = () => {
+const PlacedStudentsTable = ({companyId}) => {
 
     const emptyPlacement = {
         placement_id: null,
@@ -37,13 +36,9 @@ const PlacedStudentsTable = () => {
         core_non_core: ''
     };
 
-    const { companyId } = useParams();
     const company_Id= Number(companyId);
-    const navigate = useNavigate();
-    const Company = companyData.find(comp => comp.company_id === company_Id)
-    const CompanyName = Company ? Company.company_name : 'Unknown Company';
-
-    const [placements, setPlacements] = useState([]); // placement records
+    const [placements, setPlacements] = useState([]);
+    const [joinedData, setJoinedData] = useState([]); // Joined data of placements and students
     const [selectedPlacements, setSelectedPlacements] = useState([]); //selected placement records for bulk actions
     const [placementDialog, setPlacementDialog] = useState(false); // visibility of dialog for adding/editing placements
     const [deletePlacementDialog, setDeletePlacementDialog] = useState(false); // visibility of dialog for deleting placements
@@ -55,38 +50,36 @@ const PlacedStudentsTable = () => {
     
     // Initial data load
     useEffect(() => {
-        // fetching this data from an API (getallplacement)
         setPlacements(placementData);
-        // console.log("Company ID:", companyId);
     }, []);
 
-    // to navigate back at previous page(companies page)
-    const handleBack = () => {
-        navigate(-1);
-    }
 
-    // Filtering records by companyID (to show it in student tabel for specific company)
-    const filteredPlacements = placementData.filter(
-        placement => placement.company_id === company_Id
-    );
+    // Updates joinedData when placements or company_Id changes
+    useEffect(() => {
+        // Finding students placed in perticular company 
+        const filteredPlacements = placements.filter(
+            placement => placement.company_id === company_Id
+        );
 
-    // Map through the filtered placements and join them with the student data
-    const joinedData = filteredPlacements.map(placement => {
-        const studentDetails = getallStudent.find(student => student.student_id === placement.student_id);
-        return {
-            ...placement,
-            ...studentDetails
-        };
-    });
+        // Join (filteredPlacements + their other details from main student detail tabel)
+        const updatedJoinedData = filteredPlacements.map(placement => {
+            const studentDetails = getallStudent.find(student => student.student_id === placement.student_id);
+            return {
+                ...placement,
+                ...studentDetails
+            };
+        });
+        setJoinedData(updatedJoinedData);
+    },[placements, company_Id]);
 
-    // Adding new placement (Opens dialog to add new placement, reset form with empty placement object)
+    // Opens dialog/form to add new placement record when clicked on "New" button
     const openNew = () => {
         setPlacement(emptyPlacement);
         setSubmitted(false);
         setPlacementDialog(true);
     };
 
-    // Save/Edit placement
+    // Save new/Edited placement
     const savePlacement = () => {
         setSubmitted(true);
 
@@ -105,6 +98,7 @@ const PlacedStudentsTable = () => {
                 toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Placement Created', life: 3000 });
             }
             setPlacements(_placements);
+            // console.log('Updated placements:', _placements); // Log updated placements
             setPlacementDialog(false);
             setPlacement(emptyPlacement);
         }
@@ -121,12 +115,14 @@ const PlacedStudentsTable = () => {
         return index;
     };
 
+    // random placement id for new record
     const createId = () => {
         let id = '';
         let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         for (let i = 0; i < 5; i++) {
             id += chars.charAt(Math.floor(Math.random() * chars.length));
         }
+        // console.log(id);
         return id;
     };
 
@@ -143,10 +139,11 @@ const PlacedStudentsTable = () => {
         </React.Fragment>
     );
 
-    // Deletes selected placement from 'placements' array , then shows a success toast.
+    // to delete selected placement from 'placements' array , then shows a success toast.
     const deletePlacement = () => {
         let _placements = placements.filter((val) => val.placement_id !== placement.placement_id);
         setPlacements(_placements);
+        console.log('Placements after deletion:', _placements); // Log updated placements after deletion
         setDeletePlacementDialog(false);
         setPlacement(emptyPlacement);
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Placement Deleted', life: 3000 });
@@ -179,11 +176,12 @@ const PlacedStudentsTable = () => {
         return (
             <React.Fragment>
                 <Button label="New" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
-                <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />
+                <Button label="Export" icon="pi pi-upload" className="p-button-help mr-20" onClick={exportCSV} />
             </React.Fragment>
         );
     };
 
+    // Actions column intable
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
@@ -208,11 +206,11 @@ const PlacedStudentsTable = () => {
     // Header of student tabel
     const header = (
         <div className="table-header">
-            <h5 className="mx-0 my-1">Manage Placements</h5>
-            <span className="p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
-            </span>
+            <h2 className="mx-0 my-1">Manage Placements</h2>
+            <IconField className="p-input-icon-left" iconPosition="left">
+                    <InputIcon className="pi pi-search"> </InputIcon>
+                    <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." style={{width:'500px'}}/>
+            </IconField>
         </div>
     );
 
@@ -227,18 +225,6 @@ const PlacedStudentsTable = () => {
         
         <div className="datatable-crud-demo">
             <Toast ref={toast} />
-            
-            <div>
-                <Button 
-                onClick={handleBack}
-                className="p-button-primary"
-                label="Back to Companies"
-                icon="pi pi-arrow-left"
-                size="small"
-                />
-                <h1>{CompanyName}</h1>
-            </div>
-
             <div className="card">
                 <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
                 <DataTable ref={dt} value={joinedData} selection={selectedPlacements} onSelectionChange={(e) => setSelectedPlacements(e.value)}
@@ -249,14 +235,13 @@ const PlacedStudentsTable = () => {
                     scrollable scrollDirection="horizontal"
                     size="small"
                     resizableColumns
-                    // tableStyle={{ minWidth: '60rem' }}
                     tableStyle={{ minWidth: '100%', width: '100%' }}
                     showGridlines
                     >
 
                     <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} exportable={false}></Column>
                     {/* <Column field="placement_id" header="ID" sortable style={{ minWidth: '30%' }}></Column> */}
-                    <Column field="student_id" header="Student ID" sortable style={{ minWidth: '30%' }}></Column>
+                    <Column field="student_id" header="Roll No." sortable style={{ minWidth: '30%' }}></Column>
                     <Column field="name" header="Student Name" sortable style={{ minWidth: '30%' }}></Column>
                     <Column field="position" header="Position" sortable style={{ minWidth: '30%' }}></Column>
                     <Column field="location" header="Location" sortable style={{ minWidth: '30%' }}></Column>

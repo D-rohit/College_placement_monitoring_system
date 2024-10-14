@@ -12,6 +12,7 @@ npm install primereact
 npm install primeicons
 npm install primecharts
 npm install classnames
+npm install primeflex
 
 // Material UI
 npm install @mui/material @emotion/react @emotion/styled

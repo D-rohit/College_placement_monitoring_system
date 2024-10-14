@@ -5,6 +5,8 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { Dialog } from 'primereact/dialog';
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import classNames from 'classnames';
@@ -35,9 +37,14 @@ const Companies = () => {
     const dt = useRef(null);
     const navigate = useNavigate();
 
-    const handleViewDetails = (companyId) => {
-        navigate(`/companies/${companyId}/PlacedStudentsTable`);
-    }
+    // const handleViewDetails = (companyId) => {
+    //     navigate(`/companies/${companyId}/PlacedStudentsTable`);
+    // }
+
+    const handleViewDetails = (companyId, companyName) => {
+        navigate(`/companies/${companyId}/MainCompany?companyName=${encodeURIComponent(companyName)}`);
+    };
+    
 
     useEffect(() => {
         setCompanies(companyData);
@@ -209,8 +216,10 @@ const Companies = () => {
         <div className="table-header">
             <h5 className="mx-0 my-1" >Manage Companies</h5>
             <span className="p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." style={{width:'500px'}}/>
+                <IconField iconPosition="left">
+                    <InputIcon className="pi pi-search"> </InputIcon>
+                    <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." style={{width:'500px'}}/>
+                </IconField>
             </span>
             <Button label="Filter" icon="pi pi-filter" className="p-button-secondary ml-2" onClick={openFilterDialog} style={{alignItems:'flex-end'}}/>
         </div>
@@ -246,7 +255,9 @@ const Companies = () => {
 
     const studentDetailsBodyTemplate = (rowData) => {
         return (
-            <Button label="View Details" onClick={() => handleViewDetails(rowData.company_id, rowData.company_name)} />
+            <React.Fragment>
+                <Button label="View Details" icon="pi pi-eye"  onClick={() => handleViewDetails(rowData.company_id, rowData.company_name)} />
+            </React.Fragment>
         );
     };
 
@@ -270,8 +281,9 @@ const Companies = () => {
                   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} companies"
                   globalFilter={globalFilter}
                   header={header}
-                  tableStyle={{ minWidth: '100%', width: '100%' }}
-                  size="small"
+                  tableStyle={{ minWidth: '100%', width: '100%' , minWidth:'60rem'}}
+                  size={'small'}
+                  showGridlines
                 //   responsiveLayout="scroll"
               >
                   <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} exportable={false}></Column>
