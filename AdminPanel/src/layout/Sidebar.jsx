@@ -5,7 +5,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import BusinessIcon from '@mui/icons-material/Business';
 import GroupIcon from '@mui/icons-material/Group';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
-
+import PostAddIcon from '@mui/icons-material/PostAdd';
 const drawerWidth = 240;
 const miniDrawerWidth = 60;
 
@@ -15,6 +15,7 @@ const Sidebar = ({ open }) => {
     { text: 'Companies', icon: <BusinessIcon />, path: '/companies' },
     { text: 'Students', icon: <GroupIcon />, path: '/students' },
     { text: 'Reports', icon: <EqualizerIcon />, path: '/reports' },
+    { text: 'Job Posting', icon: <PostAddIcon />, path: '/job-posting' },
   ];
 
   return (
