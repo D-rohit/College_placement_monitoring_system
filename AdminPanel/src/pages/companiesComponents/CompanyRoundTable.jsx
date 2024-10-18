@@ -55,24 +55,24 @@ const CompanyRoundTable = ({ companyId }) => {
     };
 
     const deleteButtonTemplate = (rowData) => {
-        return <Button icon="pi pi-trash" className="p-button-danger" onClick={() => deleteRound(rowData.round_id)} />;
+        return <Button icon="pi pi-trash" rounded className="p-button-danger" outlined onClick={() => deleteRound(rowData.round_id)} />;
     };
 
     const editButtonTemplate = (rowData) => {
-        return <Button icon="pi pi-pencil" className="p-button-success" onClick={() => openEditRoundDialog(rowData)} />;
+        return <Button icon="pi pi-pencil" rounded className="p-button-success" outlined onClick={() => openEditRoundDialog(rowData)} />;
     };
 
     const dialogFooter = (
         <div>
-            <Button label="Cancel" icon="pi pi-times" onClick={() => setIsDialogVisible(false)} className="p-button-text" />
-            <Button label="Save" icon="pi pi-check" onClick={saveRound} className="p-button-text" />
+            <Button label="Cancel" icon="pi pi-times" className="p-button" outlined onClick={() => setIsDialogVisible(false)}/>
+            <Button label="Save" icon="pi pi-check" className="p-button" outlined onClick={saveRound}/>
         </div>
     );
 
     return (
         <div>
             <div style={{ marginBottom: '10px' }}>
-                <Button label="Add New Round" size='small' icon="pi pi-plus" onClick={openNewRoundDialog} />
+                <Button label="Add New Round" size='small' icon="pi pi-plus" outlined onClick={openNewRoundDialog} />
             </div>
 
             <DataTable value={filteredRounds} emptyMessage="No rounds found for this company ID">
@@ -100,7 +100,7 @@ const CompanyRoundTable = ({ companyId }) => {
                 </div>
                 <div className="p-field">
                     <label htmlFor="round_time">Round Time</label>
-                    <InputText id="round_time" value={round?.round_time} onChange={(e) => onInputChange(e, 'round_time')} />
+                    <InputText id="round_time" value={round?.round_time} placeholder="Ex- 09:00 AM to 12:30 PM" onChange={(e) => onInputChange(e, 'round_time')} />
                 </div>
                 <div className="p-field">
                     <label htmlFor="round_date">Round Date</label>
