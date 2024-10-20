@@ -32,25 +32,7 @@ const remarks = [
     { label: "Others", value: "Others" },
 ];
 const Students = () => {
-    const emptyStudent = {
-        name: "",
-        rollNumber: "",
-        personal_email: "",
-        college_email: "",
-        phone_number: "",
-        date_of_birth: null,
-        gender: null,
-        city: "",
-        state: "",
-        tenth_percentage: null,
-        twelfth_percentage: null,
-        cpi_after_8th_sem: null,
-        category: null,
-        no_of_backlog: null,
-        no_of_active_backlog: null,
-        remark: "",
-        optout: false,
-    };
+    const emptyStudent = {};
     
 
     const [students, setStudents] = useState([]);
@@ -61,6 +43,8 @@ const Students = () => {
     const [availableDepartments, setAvailableDepartments] = useState([]);
     const [originalStudents, setOriginalStudents] = useState([]);
     const [studentDialog, setStudentDialog] = useState(false);
+
+    const [updateDialog, updateStudentDialog] = useState(false);
     const [deleteStudentDialog, setDeleteStudentDialog] = useState(false);
     const [deleteStudentsDialog, setDeleteStudentsDialog] = useState(false);
     const [student, setStudent] = useState(emptyStudent);
@@ -83,22 +67,7 @@ const Students = () => {
         optout: null,
     });
     const [searchValue, setSearchValue] = useState('');
-    
-    const onSchoolChange = (e) => {
-        const schoolId = parseInt(e.target.value, 10);
-        setSelectedSchool(schoolId);
-        setAvailableDepartments(departments.filter(dep => dep.school_id === schoolId));
-        setSelectedDepartment(null);
-        const val = e.target.value;
-        setStudent((prevStudent) => ({ ...prevStudent, ['school_id']: val }));
-    };
-
-    const onDepartmentChange = (e) => {
-        setSelectedDepartment(e.target.value);
-        const val = e.target.value;
-        setStudent((prevStudent) => ({ ...prevStudent, ['dep_id']: val }));
-    };
-
+   
     async function getData() {
         const token = localStorage.getItem("token");
         const response = await axios.get(
@@ -194,6 +163,10 @@ const Students = () => {
 
     const saveStudent = async () => {
         setSubmitted(true);
+    
+        // Validation checks
+        console.log(student);
+        console.log(student.name)
         if (!student.name.trim() || !student.rollNumber.trim()) {
             toast.current.show({
                 severity: "error",
@@ -203,7 +176,7 @@ const Students = () => {
             });
             return;
         }
-
+    
         if (!student.school_id || !student.dep_id) {
             toast.current.show({
                 severity: "error",
@@ -213,7 +186,7 @@ const Students = () => {
             });
             return;
         }
-
+    
         if (
             student.tenth_percentage &&
             (student.tenth_percentage < 0 || student.tenth_percentage > 100)
@@ -226,79 +199,128 @@ const Students = () => {
             });
             return;
         }
-        if (student.name.trim() && student.rollNumber.trim()) {
-            let _students = [...students];
-            let _student = { ...student };
-            
-            let data = _students.filter((x) => {
-                return _student.rollNumber === x.rollNumber;
+    
+        let _students = [...students];
+        let _student = { ...student };
+    
+        // Check if roll number already exists
+        let data = _students.filter((x) => _student.rollNumber === x.rollNumber && _student.id !== x.id);
+        
+        if (data.length > 0) {
+            toast.current.show({
+                severity: "error",
+                summary: "Error",
+                detail: "Student with this roll number already exists.",
+                life: 3000,
             });
-            if (data.length>0) {
-                console.log(data);
-                return;
-            } else {
-                const token = localStorage.getItem("token");
-                try {
-                    const response = await axios.post(
-                        "http://localhost:3000/api/student/insertStudent",
-                        {
-                            
-                                name: student.name,
-                                rollNumber: student.rollNumber,
-                                school_id: student.school_id,
-                                dep_id: student.dep_id,
-                                year_of_study: student.year_of_study,
-                                personal_email: student.personal_email,
-                                college_email: student.college_email,
-                                phone_number: student.phone_number,
-                                date_of_birth: student.date_of_birth,
-                                gender: student.gender,
-                                city: student.city,
-                                state: student.state,
-                                tenth_percentage: student.tenth_percentage,
-                                twelfth_percentage: student.twelfth_percentage,
-                                diploma_percentage: student.diploma_percentage,
-                                cpi_after_7th_sem: student.cpi_after_7th_sem,
-                                cpi_after_8th_sem: student.cpi_after_8th_sem,
-                                remark: student.remark,
-                                category: student.category,
-                                no_of_backlog: student.no_of_backlog,
-                                no_of_active_backlog: student.no_of_active_backlog,
-                                optout: student.optout,
-                            
-                        },
-                        {
-                            headers: {
-                                Authorization: `Bearer ${token}`, // Passing the token in the Authorization header
-                            }
-                        }
-                    );
-                    
-
-                    getData();
-                } catch (error) {
-                    console.error("Error saving student:", error);
-                    toast.current.show({
-                        severity: "error",
-                        summary: "Error",
-                        detail: "Failed to save student.",
-                        life: 3000,
-                    });
-                }
-            }
-            setSelectedSchool(null)
-            setSelectedDepartment(null)
-            setStudent(emptyStudent);
+            return;
         }
-
-        setStudentDialog(false);
+    
+        const token = localStorage.getItem("token");
+    
+        try {
+            if (student.student_id) {
+                // Update existing student
+                const response = await axios.put(
+                    `http://localhost:3000/api/student/updateStudentById/${student.student_id}`,
+                    {
+                        name: student.name,
+                        rollNumber: student.rollNumber,
+                        school_id: student.school_id,
+                        dep_id: student.dep_id,
+                        year_of_study: student.year_of_study,
+                        personal_email: student.personal_email,
+                        college_email: student.college_email,
+                        phone_number: student.phone_number,
+                        date_of_birth: student.date_of_birth,
+                        gender: student.gender,
+                        city: student.city,
+                        state: student.state,
+                        tenth_percentage: student.tenth_percentage,
+                        twelfth_percentage: student.twelfth_percentage,
+                        diploma_percentage: student.diploma_percentage,
+                        cpi_after_7th_sem: student.cpi_after_7th_sem,
+                        cpi_after_8th_sem: student.cpi_after_8th_sem,
+                        remark: student.remark,
+                        category: student.category,
+                        no_of_backlog: student.no_of_backlog,
+                        no_of_active_backlog: student.no_of_active_backlog,
+                        optout: student.optout,
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+                toast.current.show({
+                    severity: "success",
+                    summary: "Success",
+                    detail: "Student updated successfully.",
+                    life: 3000,
+                });
+            } else {
+                // Insert new student
+                const response = await axios.post(
+                    "http://localhost:3000/api/student/insertStudent",
+                    {
+                        name: student.name,
+                        rollNumber: student.rollNumber,
+                        school_id: student.school_id,
+                        dep_id: student.dep_id,
+                        year_of_study: student.year_of_study,
+                        personal_email: student.personal_email,
+                        college_email: student.college_email,
+                        phone_number: student.phone_number,
+                        date_of_birth: student.date_of_birth,
+                        gender: student.gender,
+                        city: student.city,
+                        state: student.state,
+                        tenth_percentage: student.tenth_percentage,
+                        twelfth_percentage: student.twelfth_percentage,
+                        diploma_percentage: student.diploma_percentage,
+                        cpi_after_7th_sem: student.cpi_after_7th_sem,
+                        cpi_after_8th_sem: student.cpi_after_8th_sem,
+                        remark: student.remark,
+                        category: student.category,
+                        no_of_backlog: student.no_of_backlog,
+                        no_of_active_backlog: student.no_of_active_backlog,
+                        optout: student.optout,
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+                toast.current.show({
+                    severity: "success",
+                    summary: "Success",
+                    detail: "Student added successfully.",
+                    life: 3000,
+                });
+            }
+    
+            getData(); // Refresh student list
+            setSelectedSchool(null);
+            setSelectedDepartment(null);
+            setStudent(emptyStudent);
+            setStudentDialog(false);
+            
+        updateStudentDialog(false);
+        } catch (error) {
+            console.error("Error saving/updating student:", error);
+            toast.current.show({
+                severity: "error",
+                summary: "Error",
+                detail: "Failed to save student.",
+                life: 3000,
+            });
+        }
     };
+    
 
-    const editStudent = (student) => {
-        setStudent({ ...student });
-        setStudentDialog(true);
-    };
-
+   
     const confirmDeleteStudent = (student) => {
         setStudent(student);
         setDeleteStudentDialog(true);
@@ -429,6 +451,12 @@ const deleteSelectedStudents = async () => {
         setSubmitted(false);
         setStudentDialog(false);
     };
+    const hideUpdateDialog = () => {
+        setSelectedSchool(null)
+        setSelectedDepartment(null)
+        setSubmitted(false);
+        updateStudentDialog(false);
+    };
 
     const hideDeleteStudentDialog = () => {
         setDeleteStudentDialog(false);
@@ -507,6 +535,37 @@ const deleteSelectedStudents = async () => {
             </>
         );
     };
+    const editStudent = (student) => {
+        
+        setStudent({ ...student });
+       
+        setSelectedSchool(student.school_id);
+        setAvailableDepartments(departments.filter(dep => dep.school_id === student.school_id));
+        setSelectedDepartment(student.dep_id);
+        setStudent((prevStudent) => ({ ...prevStudent, ['school_id']: student.school_id }));
+        setStudent((prevStudent) => ({ ...prevStudent, ['dep_id']: student.dep_id }));
+        updateStudentDialog(true);
+
+    };
+
+   
+     
+    const onSchoolChange = (e) => {
+        const schoolId = parseInt(e.target.value, 10);
+        setSelectedSchool(schoolId);
+        setAvailableDepartments(departments.filter(dep => dep.school_id === schoolId));
+        setSelectedDepartment(null);
+        const val = e.target.value;
+        setStudent((prevStudent) => ({ ...prevStudent, ['school_id']: val }));
+    };
+
+    const onDepartmentChange = (e) => {
+        setSelectedDepartment(e.target.value);
+        // console.log(e.target.value);
+        const val = e.target.value;
+        setStudent((prevStudent) => ({ ...prevStudent, ['dep_id']: val }));
+    };
+
 
     const studentDialogFooter = (
         <>
@@ -524,6 +583,23 @@ const deleteSelectedStudents = async () => {
             />
         </>
     );
+    const updateDialogFooter = (
+        <>
+            <Button
+                label="Cancel"
+                icon="pi pi-times"
+                className="p-button-text"
+                onClick={hideUpdateDialog}
+            />
+            <Button
+                label="Update"
+                icon="pi pi-check"
+                className="p-button-text"
+                onClick={saveStudent}
+            />
+        </>
+    );
+   
 
     const deleteStudentDialogFooter = (
         <>
@@ -644,6 +720,184 @@ const deleteSelectedStudents = async () => {
                 </div>
             </div>
             <Dialog visible={studentDialog} style={{ width: '40vw' }} header="Student Details" modal footer={studentDialogFooter} onHide={hideDialog}>
+              <div className="p-fluid">
+                    <div className="p-field">
+                        <label htmlFor="name">Name</label>
+                        <InputText
+                            id="name"
+                            value={student.name}
+                            onChange={(e) => onInputChange(e, "name")}
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="rollNumber">Roll Number</label>
+                        <InputText
+                            id="rollNumber"
+                            value={student.rollNumber}
+                            onChange={(e) => onInputChange(e, "rollNumber")}
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="personal_email">Personal Email</label>
+                        <InputText
+                            id="personal_email"
+                            value={student.personal_email}
+                            onChange={(e) => onInputChange(e, "personal_email")}
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="college_email">College Email</label>
+                        <InputText
+                            id="college_email"
+                            value={student.college_email}
+                            onChange={(e) => onInputChange(e, "college_email")}
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="phone_number">Phone Number</label>
+                        <InputText
+                            id="phone_number"
+                            value={student.phone_number}
+                            onChange={(e) => onInputChange(e, "phone_number")}
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="school">School</label>
+                        <Dropdown
+                            id="school"
+                            value={selectedSchool}
+                            options={schools.map(school => ({ label: school.school_name, value: school.school_id }))}
+                            onChange={(e) => onSchoolChange(e)}
+                            placeholder="Select School"
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="department">Department</label>
+                        <Dropdown
+                            id="department"
+                            value={selectedDepartment}
+                            options={availableDepartments.map(dep => ({ label: dep.dep_name, value: dep.dep_id }))}
+                            onChange={(e) => onDepartmentChange(e)}
+                            placeholder="Select Department"
+                            disabled={!selectedSchool} // Disable until a school is selected
+                        />
+                    </div>
+
+                    <div className="p-field">
+                        <label htmlFor="date_of_birth">Date of Birth</label>
+                        <Calendar
+                            id="date_of_birth"
+                            value={student.date_of_birth}
+                            onChange={(e) => onInputChange(e, "date_of_birth")}
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="gender">Gender</label>
+                        <Dropdown
+                            id="gender"
+                            value={student.gender}
+                            options={genderOptions}
+                            onChange={(e) => onInputChange(e, "gender")}
+                            placeholder="Select Gender"
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="city">City</label>
+                        <InputText
+                            id="city"
+                            value={student.city}
+                            onChange={(e) => onInputChange(e, "city")}
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="state">State</label>
+                        <InputText
+                            id="state"
+                            value={student.state}
+                            onChange={(e) => onInputChange(e, "state")}
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="tenth_percentage">10th Percentage</label>
+                        <InputNumber
+
+maxFractionDigits={2}
+                            id="tenth_percentage"
+                            value={student.tenth_percentage}
+                            onValueChange={(e) => onInputNumberChange(e, "tenth_percentage")}
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="twelfth_percentage">12th Percentage</label>
+                        <InputNumber
+
+maxFractionDigits={2}
+                            id="twelfth_percentage"
+                            value={student.twelfth_percentage}
+                            onValueChange={(e) =>
+                                onInputNumberChange(e, "twelfth_percentage")
+                            }
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="cpi_after_8th_sem">CPI after 8th Sem</label>
+                        <InputNumber 
+                        maxFractionDigits={2}
+                            id="cpi_after_8th_sem"
+                            value={student.cpi_after_8th_sem}
+                            onValueChange={(e) => onInputNumberChange(e, "cpi_after_8th_sem")}
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="category">Category</label>
+                        <Dropdown
+                            id="category"
+                            value={student.category}
+                            options={categoryOptions}
+                            onChange={(e) => onInputChange(e, "category")}
+                            placeholder="Select Category"
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="no_of_backlog">No of Backlogs</label>
+                        <InputNumber
+                            id="no_of_backlog"
+                            value={student.no_of_backlog}
+                            onValueChange={(e) => onInputNumberChange(e, "no_of_backlog")}
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="no_of_active_backlog">No of Active Backlogs</label>
+                        <InputNumber
+                            id="no_of_active_backlog"
+                            value={student.no_of_active_backlog}
+                            onValueChange={(e) =>
+                                onInputNumberChange(e, "no_of_active_backlog")
+                            }
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="remark">Remark</label>
+                        <Dropdown
+                            id="remark"
+                            value={student.remark}
+                            options={remarks}
+                            onChange={(e) => onInputChange(e, "remark")}
+                            placeholder="Select Remark"
+                        />
+                    </div>
+                   
+                    <div className="p-field">
+                        <Checkbox
+                            id="optout"
+                            checked={student.optout}
+                            onChange={(e) => onInputChange(e, "optout")}
+                        />
+                        <label htmlFor="optout">Optout</label>
+                    </div>
+                </div>
+            </Dialog>
+            <Dialog visible={updateDialog} style={{ width: '40vw' }} header="Student Details" modal footer={updateDialogFooter} onHide={hideUpdateDialog}>
               <div className="p-fluid">
                     <div className="p-field">
                         <label htmlFor="name">Name</label>
