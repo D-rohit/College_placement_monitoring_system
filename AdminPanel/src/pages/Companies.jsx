@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -9,11 +10,8 @@ import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
-import { Dropdown } from 'primereact/dropdown';
-
 import classNames from 'classnames';
 
-import companyData from './Data/CompanyData';
 import "primeflex/primeflex.css";
 import './Companies.css';
 
@@ -23,19 +21,18 @@ const Companies = () => {
         company_name: '',
         email: '',
         phone_number: '',
-        no_of_student_placed: 0,
-        comp_category: ''
+        no_of_student_placed: 0
     };
 
+    const [originalCompanies, setOriginalCompanies] = useState([]); // original data
     const [companies, setCompanies] = useState([]);
     const [companyDialog, setCompanyDialog] = useState(false);
     const [filterDialog, setFilterDialog] = useState(false);
-    const [filter, setFilter] = useState({ 
-        company_name: '', 
-        email: '', 
-        phone_number: '', 
-        no_of_student_placed: null,
-        comp_category: null
+    const [filter, setFilter] = useState({
+        company_name: '',
+        email: '',
+        phone_number: '',
+        no_of_student_placed: null
     }); // Filter criteria state
 
     const [deleteCompanyDialog, setDeleteCompanyDialog] = useState(false);
@@ -49,8 +46,23 @@ const Companies = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        setCompanies(companyData);
+        getCompanies();
     }, []);
+
+    async function getCompanies() {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+            "http://localhost:3000/api/company/getAllCompanies",
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Passing the token in the Authorization header
+                },
+            }
+        )
+        const companyData = response.data;
+        setCompanies(companyData);
+        setOriginalCompanies(companyData); // storing original data
+    }
 
     // 'View Details' navigation 
     const handleViewDetails = (companyId, companyName) => {
@@ -74,47 +86,89 @@ const Companies = () => {
 
     const hideDeleteCompaniesDialog = () => setDeleteCompaniesDialog(false);
 
-    // for categry dropdown option in filter
-    const categories = [
-        { label: 'A', value: 'A' },
-        { label: 'B', value: 'B' },
-        { label: 'D', value: 'D' }
-    ];
-
     // CRUD operation
-    const saveCompany = () => {
+    const saveCompany = async () => {
         setSubmitted(true);
 
-        if (company.company_name.trim()) {
-            let _companies = [...companies];
-            let _company = {...company};
+        // validation checks
+        if (!company.company_name.trim()) {
+            toast.current.show({
+                severity: "error",
+                summary: "Error",
+                detail: "Company name is required.",
+                life: 3000,
+            });
+            return;
+        }
 
+        console.log("Company Modified", company);
+
+        let _companies = [...companies];
+        let _company = { ...company };
+
+        const token = localStorage.getItem("token");
+        try {
             if (company.company_id) {
-                const index = findIndexById(company.company_id);
-                _companies[index] = _company;
-                toast.current.show({ 
-                    severity: 'success', 
-                    summary: 'Successful', 
-                    detail: 'Company Details Updated', 
-                    life: 3000 });
+                // Update existing company
+                const response = await axios.put(
+                    `http://localhost:3000/api/company/updateCompanyById/${company.company_id}`,
+                    {
+                        company_name: company.company_name,
+                        email: company.email,
+                        phone_number: company.phone_number,
+                        no_of_student_placed: company.no_of_student_placed,
+                    },
+                    {
+                        header: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+                toast.current.show({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'Company Details Updated',
+                    life: 3000
+                });
             } else {
-                _company.company_id = createId();
-                _companies.push(_company);
-                toast.current.show({ 
-                    severity: 'success', 
-                    summary: 'Successful', 
-                    detail: 'New Company Added', 
-                    life: 3000 });
+                const response = await axios.post(
+                    "http://localhost:3000/api/company/insertCompany",
+                    {
+                        company_name: company.company_name,
+                        email: company.email,
+                        phone_number: company.phone_number,
+                        no_of_student_placed: company.no_of_student_placed,
+                    },
+                    {
+                        header: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+                toast.current.show({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'New Company Added',
+                    life: 3000
+                });
             }
-
-            setCompanies(_companies);
-            setCompanyDialog(false);
+            getCompanies(); // Refresh company data
             setCompany(emptyCompany);
+            setCompanyDialog(false);
+            // updateCompanyDialog(false);
+        } catch (error) {
+            console.log("Error saving/updating company", error);
+            toast.current.show({
+                severity: "error",
+                summary: "Error",
+                detail: "Failed to save company.",
+                life: 3000,
+            });
         }
     };
 
     const editCompany = (company) => {
-        setCompany({...company});
+        setCompany({ ...company });
         setCompanyDialog(true);
     };
 
@@ -123,15 +177,50 @@ const Companies = () => {
         setDeleteCompanyDialog(true);
     };
 
-    const deleteCompany = () => {
-        setCompanies(companies.filter(val => val.company_id !== company.company_id));
-        setDeleteCompanyDialog(false);
-        setCompany(emptyCompany);
-        toast.current.show({ 
-            severity: 'success', 
-            summary: 'Successful', 
-            detail: 'Company Deleted', 
-            life: 3000 });
+    const deleteCompany = async () => {
+        try {
+            const token = await localStorage.getItem("token");
+            const response = await axios.delete(`http://localhost:3000/api/company/deleteCompanyById/${company.company_id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Passing the token in the Authorization header
+                },
+            });
+
+            if (response.status === 200) {
+                // If the deletion is successful, update the UI
+                let _companies = companies.filter(
+                    (val) => val.company_id !== company.company_id
+                );
+                setCompanies(_companies);
+                setDeleteCompanyDialog(false);
+                setCompany(emptyCompany);
+
+                toast.current.show({
+                    severity: "success",
+                    summary: "Successful",
+                    detail: "Company Deleted",
+                    life: 3000,
+                });
+            }
+            else {
+                // Handle error response
+                toast.current.show({
+                    severity: "error",
+                    summary: "Error",
+                    detail: "Failed to delete company",
+                    life: 3000,
+                });
+            }
+        } catch (error) {
+            // Handle error during API call
+            console.error("Error deleting company:", error);
+            toast.current.show({
+                severity: "error",
+                summary: "Error",
+                detail: "Failed to delete company",
+                life: 3000,
+            });
+        }
     };
 
     const findIndexById = (id) => companies.findIndex((comp) => comp.company_id === id);
@@ -142,15 +231,49 @@ const Companies = () => {
 
     const confirmDeleteSelected = () => setDeleteCompaniesDialog(true);
 
-    const deleteSelectedCompanies = () => {
-        setCompanies(companies.filter((val) => !selectedCompanies.includes(val)));
-        setDeleteCompaniesDialog(false);
-        setSelectedCompanies(null);
-        toast.current.show({ 
-            severity: 'success', 
-            summary: 'Successful', 
-            detail: 'Companies Deleted', 
-            life: 3000 });
+    const deleteSelectedCompanies = async () => {
+        try {
+            const token = await localStorage.getItem("token");
+            for (const company of selectedCompanies) {
+
+                const response = await axios.delete(`http://localhost:3000/api/company/deleteCompanyById/${company.company_id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Passing the token in the Authorization header
+                    },
+                });
+
+                if (response.status !== 200) {
+                    // Handle error response
+                    console.error(`Error deleting company ${company.company_name}:`, response.data);
+                    toast.current.show({
+                        severity: "error",
+                        summary: "Error",
+                        detail: `Failed to delete company ${company.company_name}`,
+                        life: 3000,
+                    });
+                    continue;
+                }
+            }
+            // After all successful deletions, update the UI
+            getCompanies()
+            setDeleteCompaniesDialog(false);
+            setSelectedCompanies([])
+
+            toast.current.show({
+                severity: "success",
+                summary: "Successful",
+                detail: "Companies Deleted",
+                life: 3000,
+            });
+        } catch (error) {
+            console.error("Error deleting company:", error);
+            toast.current.show({
+                severity: "error",
+                summary: "Error",
+                detail: "Failed to delete company",
+                life: 3000,
+            });
+        }
     };
 
     const onInputChange = (e, name) => {
@@ -166,13 +289,13 @@ const Companies = () => {
     const onCategoryChange = (e) => {
         setCompany({ ...company, comp_category: e.value });
     };
-    
+
 
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" outlined onClick={() => editCompany(rowData)}/>
-                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning" outlined onClick={() => confirmDeleteCompany(rowData)}/>
+                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" outlined onClick={() => editCompany(rowData)} />
+                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning" outlined onClick={() => confirmDeleteCompany(rowData)} />
             </React.Fragment>
         );
     };
@@ -199,10 +322,10 @@ const Companies = () => {
                 <span className="p-input-icon-left">
                     <IconField iconPosition="left">
                         <InputIcon className="pi pi-search"> </InputIcon>
-                        <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." style={{width:'500px'}}/>
+                        <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." style={{ width: '500px' }} />
                     </IconField>
                 </span>
-                <Button label="Filter" icon="pi pi-filter" className="p-button-secondary ml-2" outlined onClick={openFilterDialog} style={{alignItems:'flex-end'}}/>
+                <Button label="Filter" icon="pi pi-filter" className="p-button-secondary ml-2" outlined onClick={openFilterDialog} style={{ alignItems: 'flex-end' }} />
             </div>
         </div>
     );
@@ -212,8 +335,8 @@ const Companies = () => {
         let filteredData = companyData.filter((comp) => {
             return (
                 (filter.min_no_of_student_placed === null || comp.no_of_student_placed >= filter.min_no_of_student_placed) &&
-                (filter.max_no_of_student_placed === null || comp.no_of_student_placed <= filter.max_no_of_student_placed) &&
-                (filter.comp_category === null || comp.comp_category === filter.comp_category)
+                (filter.max_no_of_student_placed === null || comp.no_of_student_placed <= filter.max_no_of_student_placed)
+                // (filter.comp_category === null || comp.comp_category === filter.comp_category)
 
             );
         });
@@ -230,13 +353,13 @@ const Companies = () => {
 
     const onFilterInputNumberChange = (e, name) => setFilter({ ...filter, [name]: e.value !== null ? e.value : null });
 
-    const onFilterCategoryChange = (e) => {
-        setFilter({ ...filter, comp_category: e.value || null });
-    };
+    // const onFilterCategoryChange = (e) => {
+    //     setFilter({ ...filter, comp_category: e.value || null });
+    // };
 
     const companyDialogFooter = (
         <React.Fragment>
-            <Button label="Cancel" icon="pi pi-times" className="p-button" outlined  onClick={hideDialog} />
+            <Button label="Cancel" icon="pi pi-times" className="p-button" outlined onClick={hideDialog} />
             <Button label="Save" icon="pi pi-check" className="p-button" outlined onClick={saveCompany} />
         </React.Fragment>
     );
@@ -261,31 +384,31 @@ const Companies = () => {
             <h2 className="ml-5" >Manage Companies</h2>
             <div className="card">
                 <DataTable
-                  ref={dt}
-                  value={companies}
-                  selection={selectedCompanies}
-                  onSelectionChange={(e) => setSelectedCompanies(e.value)}
-                  dataKey="company_id" /*identify each row uniquely */
-                  paginator
-                  rows={5}
-                  rowsPerPageOptions={[5, 10, 25]}
-                  paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} companies"
-                  globalFilter={globalFilter}
-                  header={header}
-                  tableStyle={{ minWidth: '100%', width: '100%'}}
-                  size='small'
-                  showGridlines
-              >
-                  <Column selectionMode="multiple" exportable={false}></Column>
-                  <Column field="company_name" header="Company Name" sortable style={{ minWidth: '16rem' }}></Column>
-                  <Column field="email" header="Email" sortable style={{ minWidth: '12rem' }}></Column>
-                  <Column field="phone_number" header="Phone Number" sortable style={{ minWidth: '12rem' }}></Column>
-                  <Column field="comp_category" header="Category" sortable style={{ minWidth: '12rem' }}/>
-                  <Column field="no_of_student_placed" header="Students Placed" sortable style={{ minWidth: '12rem' }}></Column>
-                  <Column body={studentDetailsBodyTemplate} header="Student Details" style={{ minWidth: '12rem' }}/>
-                  <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '8rem' }}></Column>
-              </DataTable>
+                    ref={dt}
+                    value={companies}
+                    selection={selectedCompanies}
+                    onSelectionChange={(e) => setSelectedCompanies(e.value)}
+                    dataKey="company_id" /*identify each row uniquely */
+                    paginator
+                    rows={5}
+                    rowsPerPageOptions={[5, 10, 25]}
+                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} companies"
+                    globalFilter={globalFilter}
+                    header={header}
+                    tableStyle={{ minWidth: '100%', width: '100%' }}
+                    size='small'
+                    showGridlines
+                >
+                    <Column selectionMode="multiple" exportable={false}></Column>
+                    <Column field="company_name" header="Company Name" sortable style={{ minWidth: '16rem' }}></Column>
+                    <Column field="email" header="Email" sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="phone_number" header="Phone Number" sortable style={{ minWidth: '12rem' }}></Column>
+                    {/* <Column field="comp_category" header="Category" sortable style={{ minWidth: '12rem' }}/> */}
+                    <Column field="no_of_student_placed" header="Students Placed" sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column body={studentDetailsBodyTemplate} header="Student Details" style={{ minWidth: '12rem' }} />
+                    <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '8rem' }}></Column>
+                </DataTable>
             </div>
 
             {/* Add/Edit Company Dialog */}
@@ -307,10 +430,10 @@ const Companies = () => {
                     <label htmlFor="no_of_student_placed">Students Placed</label>
                     <InputNumber id="no_of_student_placed" value={company.no_of_student_placed} onValueChange={(e) => onInputNumberChange(e, 'no_of_student_placed')} />
                 </div>
-                <div className="field">
+                {/* <div className="field">
                     <label htmlFor="comp_category">Category</label>
                     <Dropdown id="comp_category" value={company.comp_category} options={categories} onChange={onCategoryChange} placeholder="Select a Category" />
-                </div>
+                </div> */}
 
             </Dialog>
 
@@ -334,6 +457,7 @@ const Companies = () => {
                         useGrouping={false}
                     />
                 </div>
+                {/*
                 <div className="field">
                     <label htmlFor="comp_category">Category</label>
                     <Dropdown 
@@ -345,6 +469,7 @@ const Companies = () => {
                     showClear
                     />
                 </div>
+                */}
 
             </Dialog>
 
@@ -352,16 +477,16 @@ const Companies = () => {
             {/* Delete single company dialog */}
             <Dialog visible={deleteCompanyDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteCompanyDialogFooter} onHide={hideDeleteCompanyDialog}>
                 <div className="confirmation-content flex">
-                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem',color:'red'}} />
-                    {company && <span  style={{color:'red'}}>Are you sure you want to delete <b>{company.company_name}</b>?</span>}
+                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem', color: 'red' }} />
+                    {company && <span style={{ color: 'red' }}>Are you sure you want to delete <b>{company.company_name}</b>?</span>}
                 </div>
             </Dialog>
 
             {/* Delete multiple companies dialog */}
             <Dialog visible={deleteCompaniesDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteCompaniesDialogFooter} onHide={hideDeleteCompaniesDialog}>
                 <div className="confirmation-content">
-                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem',color:'red'}} />
-                    {company && <span style={{color:'red'}}>Are you sure you want to delete the selected companies?</span>}
+                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem', color: 'red' }} />
+                    {company && <span style={{ color: 'red' }}>Are you sure you want to delete the selected companies?</span>}
                 </div>
             </Dialog>
 
