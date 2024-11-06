@@ -119,7 +119,7 @@ const Companies = () => {
                         no_of_student_placed: company.no_of_student_placed,
                     },
                     {
-                        header: {
+                        headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     }
@@ -140,7 +140,7 @@ const Companies = () => {
                         no_of_student_placed: company.no_of_student_placed,
                     },
                     {
-                        header: {
+                        headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     }
@@ -312,13 +312,13 @@ const Companies = () => {
     const hideFilterDialog = () => setFilterDialog(false);
 
     const header = (
-        <div className="table-header" class="flex justify-content-between flex-wrap">
-            <div class="flex flex-wrap">
+        <div className="table-header flex justify-content-between flex-wrap">
+            <div className="flex flex-wrap">
                 <Button label="New" icon="pi pi-plus" className="p-button-success mr-2" outlined onClick={openNew} />
                 <Button label="Delete" icon="pi pi-trash" className="p-button-danger mr-2" outlined onClick={confirmDeleteSelected} disabled={!selectedCompanies || !selectedCompanies.length} />
                 <Button label="Export" icon="pi pi-upload" className="p-button-help mr-2" outlined onClick={exportCSV} />
             </div>
-            <div class="flex align-items-center flex-wrap">
+            <div className="flex align-items-center flex-wrap">
                 <span className="p-input-icon-left">
                     <IconField iconPosition="left">
                         <InputIcon className="pi pi-search"> </InputIcon>
