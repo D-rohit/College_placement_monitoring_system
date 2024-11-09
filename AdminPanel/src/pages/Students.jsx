@@ -164,9 +164,7 @@ const Students = () => {
     const saveStudent = async () => {
         setSubmitted(true);
     
-        // Validation checks
-        console.log(student);
-        console.log(student.name)
+        
         if (!student.name.trim() || !student.rollNumber.trim()) {
             toast.current.show({
                 severity: "error",

@@ -1,4 +1,5 @@
-import React, { useState,useRef,useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Checkbox } from 'primereact/checkbox';
@@ -9,19 +10,75 @@ import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
 import * as XLSX from 'xlsx';
 
-import getallStudent from '../Data/StudentsData';
-import roundStudentsData from './RoundStudentsData'; // the data where student-rounds are tracked
-import companyRoundData from './CompanyRoundData'; // Assuming this holds the round details
+// Assuming roundStudentsData is still being imported
+import roundStudentsData from './RoundStudentsData';
 
-const ManageStudents = () => {
+const ManageStudents = ({ companyId }) => {
     const [selectedStudents, setSelectedStudents] = useState([]);
     const [selectedRound, setSelectedRound] = useState(null);
-    const [globalFilter, setGlobalFilter] = useState(''); // For search functionality
-
-    const [filteredStudents, setFilteredStudents] = useState(getallStudent);
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [students, setStudents] = useState([]);
+    const [filteredStudents, setFilteredStudents] = useState([]);
+    const [rounds, setRounds] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
     const [loading, setLoading] = useState(false);
-    const fileInputRef = useRef(null); // To reset file input
+    const fileInputRef = useRef(null);
+
+    // Fetch students from API
+    const fetchStudents = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+                "http://localhost:3000/api/student/getAllStudents",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const studentData = response.data;
+            setStudents(studentData);
+            setFilteredStudents(studentData);
+        } catch (error) {
+            console.error("Error fetching students:", error);
+            setErrorMessage("Failed to fetch student data. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch rounds from API
+    const fetchRounds = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+                `http://localhost:3000/api/interviewRound/getByCompanyId/${companyId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setRounds(response.data);
+            // Set the latest round by default
+            const latestRound = response.data.reduce((latest, current) => {
+                return current.round_id > latest ? current.round_id : latest;
+            }, "R000");
+            setSelectedRound(latestRound);
+        } catch (error) {
+            console.error("Error fetching rounds:", error);
+            setErrorMessage("Failed to fetch round data. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStudents();
+        fetchRounds();
+    }, [companyId]);
 
     const handleFileUpload = (e) => {
         setLoading(true);
@@ -35,7 +92,6 @@ const ManageStudents = () => {
             const worksheet = workbook.Sheets[firstSheetName];
             const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-
             if (!jsonData.length) {
                 setErrorMessage('The Excel file is empty or invalid.');
                 return;
@@ -46,62 +102,44 @@ const ManageStudents = () => {
                 return;
             }
 
-            // Extract and normalize roll numbers
             const extractedRollNumbers = jsonData.map((row) =>
                 String(row['Roll No.']).trim().toLowerCase()
             ).filter(Boolean);
-            console.log(extractedRollNumbers)
-            console.log(getallStudent)
 
-            // Filter getallStudent based on the roll numbers
-            const matchedStudents = getallStudent.filter((student) =>
+            const matchedStudents = students.filter((student) =>
                 extractedRollNumbers.includes(String(student.rollNumber).trim().toLowerCase())
             );
+
             if (matchedStudents.length === 0) {
                 setErrorMessage('No matching students found.');
             }
-            
 
-            // Show matched students or reset to all students if no match
-            setFilteredStudents(matchedStudents.length === 0 ? setErrorMessage('No matching students found.') : matchedStudents);
-            // setErrorMessage('');
-
-            // Reset file input to allow re-upload
+            setFilteredStudents(matchedStudents.length === 0 ? students : matchedStudents);
             fileInputRef.current.value = '';
-            setLoading(false); // Turn off loading once file is processed
+            setLoading(false);
         };
 
         reader.readAsBinaryString(file);
     };
 
-    // Reset the table and the file input
     const resetTable = () => {
-        setFilteredStudents(getallStudent);
+        setFilteredStudents(students);
         setErrorMessage('');
-        fileInputRef.current.value = ''; // Reset file input
+        fileInputRef.current.value = '';
     };
 
-    useEffect(() => {
-        const latestRound = companyRoundData.reduce((latest, current) => {
-            return current.round_id > latest ? current.round_id : latest;
-        }, "R000"); // Start with an initial value to compare
-        setSelectedRound(latestRound); // Set default as the latest round
-    }, []);
-
-    const roundOptions = companyRoundData.map((round) => ({
+    const roundOptions = rounds.map((round) => ({
         label: round.round_name,
         value: round.round_id
     }));
 
     const onStudentSelect = (e, studentId) => {
         let _selectedStudents = [...selectedStudents];
-
         if (e.checked) {
-            _selectedStudents.push(studentId); // Add student to selection
+            _selectedStudents.push(studentId);
         } else {
-            _selectedStudents = _selectedStudents.filter(id => id !== studentId); // Remove student from selection
+            _selectedStudents = _selectedStudents.filter(id => id !== studentId);
         }
-
         setSelectedStudents(_selectedStudents);
     };
 
@@ -148,7 +186,6 @@ const ManageStudents = () => {
         <div>
             <h2>Add Students to Round</h2>
 
-            {/* Dropdown for selecting round */}
             <div style={{ marginBottom: '20px' }}>
                 <Dropdown
                     value={selectedRound}
@@ -161,9 +198,7 @@ const ManageStudents = () => {
 
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
 
-            {/* DataTable to show the list of students */}
             <DataTable value={filteredStudents} header={header} globalFilter={globalFilter} paginator rows={5} sortField="name" sortOrder={1}>
-                {/* Checkbox column */}
                 <Column
                     header="Select"
                     body={(rowData) => (
@@ -178,11 +213,8 @@ const ManageStudents = () => {
                 <Column field="name" header="Student Name" filter filterPlaceholder="Search by Name" style={{ minWidth: '200px' }} />
                 <Column field="phone_number" header="Phone Number" filter filterPlaceholder="Search" style={{ minWidth: '200px' }} />
                 <Column field="college_email" header="Email" filter filterPlaceholder="Search" style={{ minWidth: '200px' }} />
-
-                
             </DataTable>
 
-            {/* Button to add selected students to the selected round */}
             <Button
                 label={`Add Selected Students to ${selectedRound || 'Latest Round'}`}
                 onClick={addStudentsToSelectedRound}
