@@ -63,10 +63,7 @@ const ManageStudents = ({ companyId }) => {
             );
             setRounds(response.data);
             // Set the latest round by default
-            const latestRound = response.data.reduce((latest, current) => {
-                return current.round_id > latest ? current.round_id : latest;
-            }, "R000");
-            setSelectedRound(latestRound);
+            
         } catch (error) {
             console.error("Error fetching rounds:", error);
             setErrorMessage("Failed to fetch round data. Please try again later.");
@@ -78,6 +75,7 @@ const ManageStudents = ({ companyId }) => {
     useEffect(() => {
         fetchStudents();
         fetchRounds();
+        console.log(selectedRound)
     }, [companyId]);
 
     const handleFileUpload = (e) => {
@@ -143,24 +141,42 @@ const ManageStudents = ({ companyId }) => {
         setSelectedStudents(_selectedStudents);
     };
 
-    const addStudentsToSelectedRound = () => {
-        const newEntries = selectedStudents.filter((studentId) => {
-            return !roundStudentsData.some((entry) => entry.round_id === selectedRound && entry.student_id === studentId);
-        }).map((studentId) => ({
-            round_id: selectedRound,
-            student_id: studentId
-        }));
-
-        if (newEntries.length === 0) {
-            console.log("No new students to add, all are already in this round.");
-        } else {
-            console.log("Students added to round:", newEntries);
-            roundStudentsData.push(...newEntries);
+    const addStudentsToSelectedRound = async () => {
+        if (selectedStudents.length === 0) {
+            console.error("No students selected to add.");
+            return;
         }
-
-        setSelectedStudents([]);
+    
+        const token = localStorage.getItem("token");
+    
+        try {
+            for (const studentId of selectedStudents) {
+                const data = {
+                    round_id: selectedRound,
+                    student_id: studentId,
+                };
+    
+                const response = await axios.post(
+                    `http://localhost:3000/api/roundParticipation/insert`,
+                    data,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`, // Passing the token in the Authorization header
+                        },
+                    }
+                );
+    
+                console.log(`Student ${studentId} added to round ${selectedRound}:`, response.data);
+            }
+    
+            console.log("All students have been added to the selected round.");
+            setSelectedStudents([]); // Clear selected students after successful additions
+        } catch (error) {
+            console.error("Error adding students to the round:", error);
+            setErrorMessage("Failed to add some or all students to the round. Please try again later.");
+        }
     };
-
+    
     const header = (
         <div className="table-header">
             <h2>Manage Students for Round</h2>
@@ -198,29 +214,33 @@ const ManageStudents = ({ companyId }) => {
 
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
 
-            <DataTable value={filteredStudents} header={header} globalFilter={globalFilter} paginator rows={5} sortField="name" sortOrder={1}>
-                <Column
-                    header="Select"
-                    body={(rowData) => (
-                        <Checkbox
-                            onChange={(e) => onStudentSelect(e, rowData.student_id)}
-                            checked={selectedStudents.includes(rowData.student_id)}
+            {selectedRound!=null && (
+                <>
+                    <DataTable value={filteredStudents} header={header} globalFilter={globalFilter} paginator rows={5} sortField="name" sortOrder={1}>
+                        <Column
+                            header="Select"
+                            body={(rowData) => (
+                                <Checkbox
+                                    onChange={(e) => onStudentSelect(e, rowData.student_id)}
+                                    checked={selectedStudents.includes(rowData.student_id)}
+                                />
+                            )}
+                            style={{ width: '50px' }}
                         />
-                    )}
-                    style={{ width: '50px' }}
-                />
-                <Column field="rollNumber" header="Student ID" filter filterPlaceholder="Search by ID" style={{ minWidth: '150px' }} />
-                <Column field="name" header="Student Name" filter filterPlaceholder="Search by Name" style={{ minWidth: '200px' }} />
-                <Column field="phone_number" header="Phone Number" filter filterPlaceholder="Search" style={{ minWidth: '200px' }} />
-                <Column field="college_email" header="Email" filter filterPlaceholder="Search" style={{ minWidth: '200px' }} />
-            </DataTable>
+                        <Column field="rollNumber" header="Student ID" filter filterPlaceholder="Search by ID" style={{ minWidth: '150px' }} />
+                        <Column field="name" header="Student Name" filter filterPlaceholder="Search by Name" style={{ minWidth: '200px' }} />
+                        <Column field="phone_number" header="Phone Number" filter filterPlaceholder="Search" style={{ minWidth: '200px' }} />
+                        <Column field="college_email" header="Email" filter filterPlaceholder="Search" style={{ minWidth: '200px' }} />
+                    </DataTable>
 
-            <Button
-                label={`Add Selected Students to ${selectedRound || 'Latest Round'}`}
-                onClick={addStudentsToSelectedRound}
-                disabled={selectedStudents.length === 0}
-                style={{ marginTop: '20px' }}
-            />
+                    <Button
+                        label={`Add Selected Students to Round`}
+                        onClick={addStudentsToSelectedRound}
+                        disabled={selectedStudents.length === 0}
+                        style={{ marginTop: '20px' }}
+                    />
+                </>
+            )}
         </div>
     );
 };

@@ -2,36 +2,66 @@ import React, { useState, useEffect } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { InputText } from 'primereact/inputtext'; // For global search
-import companyRoundData from './CompanyRoundData';
-import roundStudentsData from './RoundStudentsData';
-import getallStudent from '../Data/StudentsData';
+import { InputText } from 'primereact/inputtext';
+import axios from 'axios';
 
 const RoundWiseStudent = ({ companyId }) => {
-    
+    const [rounds, setRounds] = useState([]);
     const [selectedRound, setSelectedRound] = useState(null); // State for selected round
     const [filteredStudents, setFilteredStudents] = useState([]); // State for filtered students
-    const [globalFilter, setGlobalFilter] = useState(''); 
-    const filteredRounds = companyRoundData.filter((round) => round.company_id === companyId) 
-    const roundOptions = filteredRounds.map((round) => ({
-        label: round.round_name,
-        value: round.round_id
-    }));
+    const [globalFilter, setGlobalFilter] = useState('');
+
+    const fetchRounds = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+                `http://localhost:3000/api/interviewRound/getByCompanyId/${companyId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setRounds(response.data);
+        } catch (error) {
+            console.error("Error fetching rounds:", error);
+        }
+    };
+
+    const fetchStudentsByRound = async (roundId) => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+                `http://localhost:3000/api/roundParticipation/getStudentsByRoundId/${roundId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setFilteredStudents(response.data);
+        } catch (error) {
+            console.error("Error fetching students:", error);
+            setFilteredStudents([]); // Clear students on error
+        }
+    };
+
+    useEffect(() => {
+        fetchRounds();
+    }, [companyId]);
 
     useEffect(() => {
         if (selectedRound) {
-            const studentsInRound = roundStudentsData
-                .filter((student) => student.round_id === selectedRound)
-                .map((student) => student.student_id);
-
-            const filteredStudents = getallStudent.filter((student) =>
-                studentsInRound.includes(String(student.student_id))
-            );
-            setFilteredStudents(filteredStudents);
+            fetchStudentsByRound(selectedRound);
         } else {
             setFilteredStudents([]); // Clear students when no round is selected
         }
     }, [selectedRound]);
+
+    const roundOptions = rounds.map((round) => ({
+        label: round.round_name,
+        value: round.round_id
+    }));
 
     return (
         <div>
@@ -51,9 +81,9 @@ const RoundWiseStudent = ({ companyId }) => {
                 <span className="p-inputgroup-addon">
                     <i className="pi pi-search" />
                 </span>
-                <InputText 
-                    value={globalFilter} 
-                    onChange={(e) => setGlobalFilter(e.target.value)} 
+                <InputText
+                    value={globalFilter}
+                    onChange={(e) => setGlobalFilter(e.target.value)}
                     placeholder="Global Search"
                     style={{ width: '300px' }}
                 />
@@ -63,7 +93,7 @@ const RoundWiseStudent = ({ companyId }) => {
             <DataTable
                 value={filteredStudents}
                 paginator
-                rows={10}
+                rows={5}
                 globalFilter={globalFilter}
                 emptyMessage="No students found for this round"
                 responsiveLayout="scroll"
@@ -79,4 +109,3 @@ const RoundWiseStudent = ({ companyId }) => {
 };
 
 export default RoundWiseStudent;
-
