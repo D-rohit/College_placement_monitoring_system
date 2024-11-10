@@ -7,7 +7,7 @@ import PlacedStudentsTable from './PlacedStudentsTable';
 import CompanyRoundTable from './CompanyRoundTable';
 import RoundWiseStudent from './RoundWiseStudent';
 import ManageStudents from './ManageStudents';
-// import "./node_modules/primeflex/primeflex.css";
+import styles from "./MainCompany.module.css";
 
 const MainCompany = () => {
 
@@ -20,7 +20,7 @@ const MainCompany = () => {
     const renderTable = () => {
         switch (activeTable) {
             case 'placedStudentsTable':
-                return <PlacedStudentsTable companyId={companyId} />;
+                return <PlacedStudentsTable companyId={companyId} companyName={companyName}/>;
             case 'companyRoundTable':
                 return <CompanyRoundTable companyId={companyId}/>;
             case 'roundWiseStudent':
@@ -39,28 +39,28 @@ const MainCompany = () => {
         navigate(-1);
     }
 
-
     return (
-        <div>
-            <header className="flex align-items-center border-2 w-full border-round">
-                <Button 
+        <div className={styles.container}>
+            <header className={styles.containerHeader}>
+                <Button
                     onClick={handleBack}
                     className="p-button-primary m-3 border-round"
                     label="Back"
                     icon="pi pi-arrow-left"
                     size="small"
+                    outlined
                 />
                 <h1 className="mx-auto">{companyName} </h1>
             </header>
             <div className="flex flex-row md:justify-content-start">
                 <Button label="Placed Students" size='small'
-                className='mr-2' onClick={() => setActiveTable('placedStudentsTable')} />
+                    className='mr-2' onClick={() => setActiveTable('placedStudentsTable')} outlined />
                 <Button label="Manage Rounds" size='small'
-                className='mr-2' onClick={() => setActiveTable('companyRoundTable')}/>
+                    className='mr-2' onClick={() => setActiveTable('companyRoundTable')} outlined />
                 <Button label="View Students" size='small'
-                className='mr-2' onClick={() => setActiveTable('roundWiseStudent')}/>
+                    className='mr-2' onClick={() => setActiveTable('roundWiseStudent')} outlined />
                 <Button label="Manage Students" size='small'
-                className='mr-2' onClick={() => setActiveTable('manageStudents')}/>
+                    className='mr-2' onClick={() => setActiveTable('manageStudents')} outlined />
             </div>
             <div>
                 {activeTable === null ? <p>Select a table to view data.</p> : renderTable()}
