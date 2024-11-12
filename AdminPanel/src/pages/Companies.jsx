@@ -11,8 +11,6 @@ import { InputIcon } from "primereact/inputicon";
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import classNames from 'classnames';
-
-import "primeflex/primeflex.css";
 import './Companies.css';
 
 const Companies = () => {
@@ -223,10 +221,6 @@ const Companies = () => {
         }
     };
 
-    const findIndexById = (id) => companies.findIndex((comp) => comp.company_id === id);
-
-    const createId = () => Math.floor(Math.random() * 1000);
-
     const exportCSV = () => dt.current.exportCSV();
 
     const confirmDeleteSelected = () => setDeleteCompaniesDialog(true);
@@ -286,11 +280,6 @@ const Companies = () => {
         setCompany({ ...company, [name]: val });
     };
 
-    const onCategoryChange = (e) => {
-        setCompany({ ...company, comp_category: e.value });
-    };
-
-
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
@@ -312,7 +301,7 @@ const Companies = () => {
     const hideFilterDialog = () => setFilterDialog(false);
 
     const header = (
-        <div className="table-header flex justify-content-between flex-wrap">
+        <div className="table-header flex-row justify-content-between flex-wrap">
             <div className="flex flex-wrap">
                 <Button label="New" icon="pi pi-plus" className="p-button-success mr-2" outlined onClick={openNew} />
                 <Button label="Delete" icon="pi pi-trash" className="p-button-danger mr-2" outlined onClick={confirmDeleteSelected} disabled={!selectedCompanies || !selectedCompanies.length} />
@@ -331,13 +320,10 @@ const Companies = () => {
     );
 
     const applyFilter = () => {
-        // Apply filter for no_of_student_placed based on min and max range
         let filteredData = companyData.filter((comp) => {
             return (
                 (filter.min_no_of_student_placed === null || comp.no_of_student_placed >= filter.min_no_of_student_placed) &&
                 (filter.max_no_of_student_placed === null || comp.no_of_student_placed <= filter.max_no_of_student_placed)
-                // (filter.comp_category === null || comp.comp_category === filter.comp_category)
-
             );
         });
         setCompanies(filteredData);
@@ -352,10 +338,6 @@ const Companies = () => {
     );
 
     const onFilterInputNumberChange = (e, name) => setFilter({ ...filter, [name]: e.value !== null ? e.value : null });
-
-    // const onFilterCategoryChange = (e) => {
-    //     setFilter({ ...filter, comp_category: e.value || null });
-    // };
 
     const companyDialogFooter = (
         <React.Fragment>
@@ -404,7 +386,6 @@ const Companies = () => {
                     <Column field="company_name" header="Company Name" sortable style={{ minWidth: '16rem' }}></Column>
                     <Column field="email" header="Email" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="phone_number" header="Phone Number" sortable style={{ minWidth: '12rem' }}></Column>
-                    {/* <Column field="comp_category" header="Category" sortable style={{ minWidth: '12rem' }}/> */}
                     <Column field="no_of_student_placed" header="Students Placed" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column body={studentDetailsBodyTemplate} header="Student Details" style={{ minWidth: '12rem' }} />
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '8rem' }}></Column>
@@ -430,11 +411,6 @@ const Companies = () => {
                     <label htmlFor="no_of_student_placed">Students Placed</label>
                     <InputNumber id="no_of_student_placed" value={company.no_of_student_placed} onValueChange={(e) => onInputNumberChange(e, 'no_of_student_placed')} />
                 </div>
-                {/* <div className="field">
-                    <label htmlFor="comp_category">Category</label>
-                    <Dropdown id="comp_category" value={company.comp_category} options={categories} onChange={onCategoryChange} placeholder="Select a Category" />
-                </div> */}
-
             </Dialog>
 
             {/* Filter Dialog */}
@@ -457,20 +433,6 @@ const Companies = () => {
                         useGrouping={false}
                     />
                 </div>
-                {/*
-                <div className="field">
-                    <label htmlFor="comp_category">Category</label>
-                    <Dropdown 
-                    id="comp_category" 
-                    value={filter.comp_category} 
-                    options={categories} 
-                    onChange={(e) => onFilterCategoryChange(e, 'comp_category')} 
-                    placeholder="Select a Category" 
-                    showClear
-                    />
-                </div>
-                */}
-
             </Dialog>
 
 
