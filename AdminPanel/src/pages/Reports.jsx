@@ -1,275 +1,138 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Chart } from 'primereact/chart';
 import { Card } from 'primereact/card';
 import { Dropdown } from 'primereact/dropdown';
-import { Container, Grid } from '@mui/material'; // Importing MUI components
-import { PrimeIcons } from 'primereact/api'; // Importing PrimeIcons
+import { Container, Grid } from '@mui/material';
 
-const Reports = () => {
-    const [allStudents, setAllStudents] = useState([]);
-    const [filteredStudents, setFilteredStudents] = useState([]);
-    const [placementStats, setPlacementStats] = useState({});
-    const [companyChartData, setCompanyChartData] = useState({});
-    const [salaryChartData, setSalaryChartData] = useState({});
-    const [trendChartData, setTrendChartData] = useState({});
-    const [selectedYear, setSelectedYear] = useState(null);
-    const [chartOptions, setChartOptions] = useState({
-        plugins: {
-            legend: {
-                labels: {
-                    color: '#495057'
-                }
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    });
-
-    const yearOptions = [
-        { label: 'All Years', value: null },
-        { label: '2023', value: 2023 },
-        { label: '2022', value: 2022 },
-        { label: '2021', value: 2021 },
-    ];
-
-    // Dummy data with all columns
-    const dummyStudents = [
-        { id: 1, name: 'John Doe', rollNumber: 'A001', graduationYear: 2023, company: 'TechCorp', salary: 75000, placed: true, department: 'Computer Science', cgpa: 3.8, placementDate: '2023-03-15', jobRole: 'Software Engineer' },
-        { id: 2, name: 'Jane Smith', rollNumber: 'A002', graduationYear: 2023, company: 'DataSoft', salary: 80000, placed: true, department: 'Information Technology', cgpa: 3.9, placementDate: '2023-03-20', jobRole: 'Data Analyst' },
-        { id: 3, name: 'Bob Johnson', rollNumber: 'A003', graduationYear: 2022, company: 'WebTech', salary: 70000, placed: true, department: 'Computer Science', cgpa: 3.5, placementDate: '2022-04-10', jobRole: 'Frontend Developer' },
-        { id: 4, name: 'Alice Brown', rollNumber: 'A004', graduationYear: 2022, company: null, salary: null, placed: false, department: 'Electronics', cgpa: 3.4, placementDate: null, jobRole: null },
-        { id: 5, name: 'Charlie Davis', rollNumber: 'A005', graduationYear: 2021, company: 'TechCorp', salary: 90000, placed: true, department: 'Computer Science', cgpa: 3.7, placementDate: '2021-03-25', jobRole: 'Full Stack Developer' },
-    ];
+const PlacementReport = () => {
+    const [allPlacements, setAllPlacements] = useState([]);
+    const [coreNonCoreData, setCoreNonCoreData] = useState([]);
+    const [yearWiseData, setYearWiseData] = useState([]);
+    const [departmentWiseData, setDepartmentWiseData] = useState([]);
 
     useEffect(() => {
-        // Fetch data from API or use dummy data
-        setAllStudents(dummyStudents);
-        setFilteredStudents(dummyStudents);
-        calculatePlacementStats(dummyStudents);
-        updateChartData(dummyStudents);
+        fetchAllPlacements();
+        fetchCoreNonCoreData();
+        fetchYearWiseData();
+        fetchDepartmentWiseData();
     }, []);
 
-    const handleYearChange = (year) => {
-        setSelectedYear(year);
-        let filtered = allStudents; // Use all students by default
-
-        if (year !== null) {
-            filtered = allStudents.filter(student => student.graduationYear === year);
+    const fetchAllPlacements = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get('http://localhost:3000/api/placement/getAllPlacementDetails',
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Passing the token in the Authorization header
+                    },
+                });
+            setAllPlacements(response.data);
+        } catch (error) {
+            console.error('Failed to fetch all placements', error);
         }
-
-        setFilteredStudents(filtered);
-        calculatePlacementStats(filtered);
-        updateChartData(filtered);
     };
 
-    const calculatePlacementStats = (data) => {
-        const totalStudents = data.length;
-        const placedStudents = data.filter(student => student.placed).length;
-        const averageSalary = data.filter(student => student.salary)
-            .reduce((sum, student) => sum + student.salary, 0) / placedStudents;
-        const highestSalary = Math.max(...data.filter(student => student.salary).map(student => student.salary));
-
-        setPlacementStats({
-            totalStudents,
-            placedStudents,
-            placementPercentage: (placedStudents / totalStudents) * 100,
-            averageSalary,
-            highestSalary
-        });
+    const fetchCoreNonCoreData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get('http://localhost:3000/api/placement/getCoreNonCorePlacements',
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Passing the token in the Authorization header
+                    },
+                });
+            setCoreNonCoreData(response.data);
+        } catch (error) {
+            console.error('Failed to fetch core/non-core data', error);
+        }
     };
 
-    const updateChartData = (data) => {
-        // Company chart data
-        const companyCount = data.reduce((acc, student) => {
-            if (student.company) {
-                acc[student.company] = (acc[student.company] || 0) + 1;
+    const fetchYearWiseData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get('http://localhost:3000/api/placement/getStudentsPlacedYearOfStudyWise',
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Passing the token in the Authorization header
+                    },
+                });
+            setYearWiseData(response.data);
+        } catch (error) {
+            console.error('Failed to fetch year-wise placement data', error);
+        }
+    };
+
+    const fetchDepartmentWiseData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get('http://localhost:3000/api/placement/getPlacedDepartmentWise',
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Passing the token in the Authorization header
+                    },
+                });
+            setDepartmentWiseData(response.data);
+        } catch (error) {
+            console.error('Failed to fetch department-wise placement data', error);
+        }
+    };
+
+    const coreNonCoreOptions = {
+        labels: coreNonCoreData.map(data => data.core_non_core),
+        datasets: [
+            {
+                data: coreNonCoreData.map(data => data.count),
+                backgroundColor: ['#42A5F5', '#66BB6A'],
+                hoverBackgroundColor: ['#64B5F6', '#81C784']
             }
-            return acc;
-        }, {});
+        ]
+    };
 
-        setCompanyChartData({
-            labels: Object.keys(companyCount),
-            datasets: [{
-                data: Object.values(companyCount),
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
-            }]
-        });
-
-        // Salary distribution chart data
-        const salaryRanges = {
-            '0-50k': 0,
-            '50k-100k': 0,
-            '100k-150k': 0,
-            '150k+': 0
-        };
-
-        data.forEach(student => {
-            if (student.salary) {
-                if (student.salary < 50000) salaryRanges['0-50k']++;
-                else if (student.salary < 100000) salaryRanges['50k-100k']++;
-                else if (student.salary < 150000) salaryRanges['100k-150k']++;
-                else salaryRanges['150k+']++;
+    const yearWiseOptions = {
+        labels: yearWiseData.map(data => data.year),
+        datasets: [
+            {
+                label: 'Number of Students Placed',
+                data: yearWiseData.map(data => data.placed_students),
+                backgroundColor: '#ffce56'
             }
-        });
-
-        setSalaryChartData({
-            labels: Object.keys(salaryRanges),
-            datasets: [{
-                label: 'Number of Students',
-                data: Object.values(salaryRanges),
-                backgroundColor: '#36A2EB'
-            }]
-        });
-
-        // Department-wise placement data
-        const deptData = data.reduce((acc, student) => {
-            if (!acc[student.department]) {
-                acc[student.department] = {
-                    total: 0,
-                    placed: 0
-                };
-            }
-            acc[student.department].total++;
-            if (student.placed) acc[student.department].placed++;
-            return acc;
-        }, {});
-
-        setTrendChartData({
-            labels: Object.keys(deptData),
-            datasets: [{
-                label: 'Total Students',
-                data: Object.values(deptData).map(d => d.total),
-                backgroundColor: '#FF6384'
-            }, {
-                label: 'Placed Students',
-                data: Object.values(deptData).map(d => d.placed),
-                backgroundColor: '#36A2EB'
-            }]
-        });
-    };
-
-    const salaryBodyTemplate = (rowData) => {
-        return rowData.salary ? `$${rowData.salary.toLocaleString()}` : 'N/A';
-    };
-
-    const placedBodyTemplate = (rowData) => {
-        return rowData.placed ? 'Yes' : 'No';
-    };
-
-    const dateBodyTemplate = (rowData) => {
-        return rowData.placementDate ? new Date(rowData.placementDate).toLocaleDateString() : 'N/A';
+        ]
     };
 
     return (
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Container>
             <Grid container spacing={3}>
                 <Grid item xs={12}>
-                    <div className="flex justify-content-between align-items-center mb-4">
-                        <h2 className="text-2xl font-bold m-0">Placement Reports</h2>
-                        <Dropdown 
-                            value={selectedYear} 
-                            options={yearOptions} 
-                            onChange={(e) => handleYearChange(e.value)} 
-                            placeholder="Select Year"
-                            className="w-200px"
-                        />
-                    </div>
-                </Grid>
-
-                <Grid item xs={12} md={3}>
-                    <Card className="shadow-1">
-                        <div className="text-center p-3">
-                            <i className={`pi ${PrimeIcons.USERS} text-4xl mb-2`}></i>
-                            <h3 className="text-sm mb-2">Total Students</h3>
-                            <p className="text-2xl font-bold text-primary">{placementStats.totalStudents}</p>
-                        </div>
+                    <Card title="Placement Details">
+                        <DataTable value={allPlacements}>
+                            <Column field="student_name" header="Student Name"></Column>
+                            <Column field="company_name" header="Company Name"></Column>
+                            <Column field="position" header="Position"></Column>
+                            <Column field="salary" header="Salary"></Column>
+                            <Column field="placement_date" header="Placement Date"></Column>
+                            <Column field="location" header="Location"></Column>
+                            <Column field="core_non_core" header="Core/Non-Core"></Column>
+                        </DataTable>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={3}>
-                    <Card className="shadow-1">
-                        <div className="text-center p-3">
-                            <i className={`pi ${PrimeIcons.CHECK} text-4xl mb-2`}></i>
-                            <h3 className="text-sm mb-2">Placed Students</h3>
-                            <p className="text-2xl font-bold text-green-500">{placementStats.placedStudents}</p>
-                        </div>
+                <Grid item xs={12} sm={6}>
+                    <Card title="Core vs Non-Core Placements">
+                        <Chart type="pie" data={coreNonCoreOptions} />
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={3}>
-                    <Card className="shadow-1">
-                        <div className="text-center p-3">
-                            <i className={`pi ${PrimeIcons.PERCENTAGE} text-4xl mb-2`}></i>
-                            <h3 className="text-sm mb-2">Placement %</h3>
-                            <p className="text-2xl font-bold text-blue-500">
-                                {placementStats.placementPercentage?.toFixed(1)}%
-                            </p>
-                        </div>
+                <Grid item xs={12} sm={6}>
+                    <Card title="Year of Study Placement Stats">
+                        <Chart type="bar" data={yearWiseOptions} />
                     </Card>
                 </Grid>
-                
-                <Grid item xs={12} md={3}>
-                    <Card className="shadow-1">
-                        <div className="text-center p-3">
-                            <i className={`pi ${PrimeIcons.DOLLAR} text-4xl mb-2`}></i>
-                            <h3 className="text-sm mb-2">Highest Salary</h3>
-                            <p className="text-2xl font-bold text-purple-500">
-                                ${placementStats.highestSalary?.toLocaleString()}
-                            </p>
-                        </div>
-                    </Card>
-                </Grid>
-
-                <Grid item xs={12} md={4}>
-                    <Card className="shadow-1" sx={{ height: '400px' }}>
-                        <div className="p-3">
-                            <h3 className="text-sm mb-2">Company Distribution</h3>
-                            <Chart type="pie" data={companyChartData} options={chartOptions} style={{ height: '300px' }} />
-                        </div>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <Card className="shadow-1" sx={{ height: '400px' }}>
-                        <div className="p-3">
-                            <h3 className="text-sm mb-2">Salary Distribution</h3>
-                            <Chart type="bar" data={salaryChartData} options={chartOptions} style={{ height: '300px' }} />
-                        </div>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <Card className="shadow-1" sx={{ height: '400px' }}>
-                        <div className="p-3">
-                            <h3 className="text-sm mb-2">Department-wise Placement</h3>
-                            <Chart type="bar" data={trendChartData} options={chartOptions} style={{ height: '300px' }} />
-                        </div>
-                    </Card>
-                </Grid>
-
                 <Grid item xs={12}>
-                    <Card title="Student Details">
-                        <DataTable 
-                            value={filteredStudents} 
-                            paginator 
-                            rows={10} 
-                            dataKey="id" 
-                            className="p-datatable-sm"
-                            scrollable 
-                            scrollHeight="400px"
-                            stripedRows
-                        >
-                            <Column field="rollNumber" header="Roll Number" sortable />
-                            <Column field="name" header="Name" sortable />
-                            <Column field="department" header="Department" sortable />
-                            <Column field="cgpa" header="CGPA" sortable />
-                            <Column field="graduationYear" header="Grad. Year" sortable />
-                            <Column field="company" header="Company" sortable />
-                            <Column field="jobRole" header="Job Role" sortable />
-                            <Column field="salary" header="Salary" body={salaryBodyTemplate} sortable />
-                            <Column field="placed" header="Placed" body={placedBodyTemplate} sortable />
-                            <Column field="placementDate" header="Placement Date" body={dateBodyTemplate} sortable />
+                    <Card title="Department Wise Placement Stats">
+                        <DataTable value={departmentWiseData}>
+                            <Column field="department" header="Department"></Column>
+                            <Column field="placed_students" header="Placed Students"></Column>
                         </DataTable>
                     </Card>
                 </Grid>
@@ -278,4 +141,4 @@ const Reports = () => {
     );
 };
 
-export default Reports;
+export default PlacementReport;

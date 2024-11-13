@@ -10,9 +10,6 @@ import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
 import * as XLSX from 'xlsx';
 
-// Assuming roundStudentsData is still being imported
-import roundStudentsData from './RoundStudentsData';
-
 const ManageStudents = ({ companyId }) => {
     const [selectedStudents, setSelectedStudents] = useState([]);
     const [selectedRound, setSelectedRound] = useState(null);
