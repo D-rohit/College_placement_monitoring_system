@@ -148,33 +148,44 @@ const JobPosting = () => {
   };
 
   const handleSendEmail = async () => {
+
+    const recipients = emailData.recipients.split(',').map(email => email.trim());
+
+    // Prepare FormData with common fields
     const formData = new FormData();
-    formData.append('recipients', emailData.recipients);
+    // formData.append('recipients', emailData.recipients);
     formData.append('subject', emailData.subject);
     formData.append('body', emailData.body);
     if (emailData.attachment) {
       formData.append('attachment', emailData.attachment);
     }
 
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:3000/api/send-email', formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    for (const recipient of recipients) {
+      try {
+        formData.set('recipient', recipient);
+        
+        const token = localStorage.getItem('token');
+        const response = await axios.post('http://localhost:3000/api/send-email', formData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        });
 
-      if (response.data.success) {
-        alert('Emails sent successfully!');
-        setEmailDialogVisible(false);
-      } else {
-        alert('Failed to send emails.');
+        if (!response.data.success) {
+          console.error(`Failed to send email to ${recipient}:`, response.data.message);
+          alert(`Failed to send email to ${recipient}.`);
+        } else {
+          console.log(`Email sent successfully to ${recipient}`);
+        }
+      } catch (error) {
+        console.error(`Error sending email to ${recipient}:`, error);
+        alert(`An error occurred while sending the email to ${recipient}.`);
       }
-    } catch (error) {
-      console.error('Error sending email:', error);
-      alert('An error occurred while sending the email.');
     }
+
+    setEmailDialogVisible(false);
+    alert('Emails sent to all recipients!');
   };
 
   const openEmailDialog = () => {
@@ -193,8 +204,7 @@ const JobPosting = () => {
       recipients: recipients.join(', '),
       body: `
         Dear Student,\n\n
-        We are pleased to inform you about a job opportunity with ${
-          applicationForm.companyName || 'our partner company'
+        We are pleased to inform you about a job opportunity with ${applicationForm.companyName || 'our partner company'
         }. Please find the details below:\n\n
         Minimum Criteria:\n
         - 10th Percentage: ${applicationForm.tenth_percentage || 'N/A'}\n
@@ -207,7 +217,7 @@ const JobPosting = () => {
 
     setEmailDialogVisible(true);
   };
-  
+
 
   // const handleSendEmail = () => {
   //   // Implement email sending logic here
@@ -253,8 +263,8 @@ const JobPosting = () => {
       )}
 
       <DataTable ref={dataTableRef} value={filteredStudents} paginator rows={10} dataKey='student_id' filters={{ 'global': { value: searchQuery, matchMode: 'contains' } }} globalFilterFields={['name', 'rollNumber']} emptyMessage="No eligible students found."
-      selection={selectedData}
-      onSelectionChange={(e) => setSelectedData(e.value)}
+        selection={selectedData}
+        onSelectionChange={(e) => setSelectedData(e.value)}
       >
         <Column selectionMode="multiple" exportable={false}></Column>
         <Column field="name" header="Name" body={(rowData) => rowData.name || 'N/A'} sortable />
@@ -390,11 +400,11 @@ const JobPosting = () => {
       >
         <div className="field flex">
           <label htmlFor="recipients" className="font-bold block mb-2">To</label>
-          <InputTextarea 
-            id="recipients" 
-            rows={2} 
-            value={emailData.recipients} 
-            readOnly 
+          <InputTextarea
+            id="recipients"
+            rows={2}
+            value={emailData.recipients}
+            readOnly
             className="w-full ml-6"
           />
         </div>
