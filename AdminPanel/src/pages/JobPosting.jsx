@@ -3,6 +3,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
+import { InputTextarea } from 'primereact/inputtextarea';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { Badge } from 'primereact/badge';
@@ -20,6 +21,14 @@ const JobPosting = () => {
   const [filteredStudents, setFilteredStudents] = useState([]);
   const dataTableRef = useRef(null);
   const [selectedData, setSelectedData] = useState(null)
+
+  const [emailDialogVisible, setEmailDialogVisible] = useState(false);
+  const [emailData, setEmailData] = useState({
+    recipients: '',
+    subject: 'Job Opportunity',
+    body: '',
+    attachment: null,
+  });
 
   // State for the application form
   const [applicationForm, setApplicationForm] = useState({
@@ -116,6 +125,7 @@ const JobPosting = () => {
     // Re-apply remaining filters
     handleCreateApplication();
   };
+
   const resetForm = () => {
     setApplicationForm({
       companyName: '',
@@ -127,11 +137,83 @@ const JobPosting = () => {
     });
   };
 
-  const handleSendEmail = () => {
-    // Implement email sending logic here
-    console.log('Sending emails to selected students');
-    setFilteredStudents(selectedData && selectedData.length > 0 ? selectedData : filteredStudents);
+  const resetFilters = () => {
+    setFilteredStudents(students);
+    setActiveFilters([]);
+    resetForm();
   };
+
+  const handleFileUpload = (e) => {
+    setEmailData({ ...emailData, attachment: e.target.files[0] });
+  };
+
+  const handleSendEmail = async () => {
+    const formData = new FormData();
+    formData.append('recipients', emailData.recipients);
+    formData.append('subject', emailData.subject);
+    formData.append('body', emailData.body);
+    if (emailData.attachment) {
+      formData.append('attachment', emailData.attachment);
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post('http://localhost:3000/api/send-email', formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.success) {
+        alert('Emails sent successfully!');
+        setEmailDialogVisible(false);
+      } else {
+        alert('Failed to send emails.');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert('An error occurred while sending the email.');
+    }
+  };
+
+  const openEmailDialog = () => {
+    const recipients = (selectedData && selectedData.length > 0
+      ? selectedData.map(student => student.college_email)
+      : filteredStudents.map(student => student.college_email)
+    );
+
+    if (!recipients.length) {
+      alert('No students available to send emails to.');
+      return;
+    }
+
+    setEmailData({
+      ...emailData,
+      recipients: recipients.join(', '),
+      body: `
+        Dear Student,\n\n
+        We are pleased to inform you about a job opportunity with ${
+          applicationForm.companyName || 'our partner company'
+        }. Please find the details below:\n\n
+        Minimum Criteria:\n
+        - 10th Percentage: ${applicationForm.tenth_percentage || 'N/A'}\n
+        - 12th Percentage: ${applicationForm.twelfth_percentage || 'N/A'}\n
+        - CPI (7th Sem): ${applicationForm.cpi_after_7th_sem || 'N/A'}\n
+        - Active Backlogs Allowed: ${applicationForm.no_of_active_backlog || 'N/A'}\n\n
+        We look forward to your participation.\n\nBest Regards,\nPlacement Team
+      `,
+    });
+
+    setEmailDialogVisible(true);
+  };
+  
+
+  // const handleSendEmail = () => {
+  //   // Implement email sending logic here
+  //   console.log('Sending emails to selected students');
+  //   setFilteredStudents(selectedData && selectedData.length > 0 ? selectedData : filteredStudents);
+  // };
 
   return (
     <div className="job-posting-page">
@@ -150,7 +232,7 @@ const JobPosting = () => {
         <Button label="Create Application" icon="pi pi-plus" className="filter-button" onClick={() => setIsDialogOpen(true)} />
       </div>
       <div className="action-buttons">
-        <Button label="Send Email" icon="pi pi-envelope" onClick={handleSendEmail} />
+        <Button label="Send Email" icon="pi pi-envelope" onClick={openEmailDialog} />
         <Button label="Export" icon="pi pi-upload" onClick={() => handleExport()} />
       </div>
 
@@ -294,8 +376,57 @@ const JobPosting = () => {
           </div>
         </div>
         <div className="flex flex-row flex-end" style={{ width: '100%', borderTop: 'solid 1px grey', alignContent: 'end' }}>
-          <Button label="Cancel" icon="pi pi-times" onClick={() => setIsDialogOpen(false)} outlined className="p-button-danger" style={{ marginRight: '16rem' }} />
+          <Button label="Cancel" icon="pi pi-times" onClick={() => resetFilters()} outlined className="p-button-danger" style={{ marginRight: '16rem' }} />
           <Button label="Create" outlined icon="pi pi-check" onClick={handleCreateApplication} autoFocus />
+        </div>
+      </Dialog>
+
+      {/* email dialog */}
+      <Dialog
+        visible={emailDialogVisible}
+        onHide={() => setEmailDialogVisible(false)}
+        header="Draft Email"
+        style={{ width: '50vw' }}
+      >
+        <div className="field flex">
+          <label htmlFor="recipients" className="font-bold block mb-2">To</label>
+          <InputTextarea 
+            id="recipients" 
+            rows={2} 
+            value={emailData.recipients} 
+            readOnly 
+            className="w-full ml-6"
+          />
+        </div>
+
+        <div className="field flex">
+          <label htmlFor="subject" className="font-bold block mb-2">Subject</label>
+          <InputText
+            id="subject"
+            value={emailData.subject}
+            onChange={(e) => setEmailData({ ...emailData, subject: e.target.value })}
+            className="w-full ml-2"
+          />
+        </div>
+
+        <div className="field">
+          <InputTextarea
+            id="body"
+            rows={10}
+            value={emailData.body}
+            onChange={(e) => setEmailData({ ...emailData, body: e.target.value })}
+            className="w-full"
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="attachment" className="font-bold block mb-2">Attachments</label>
+          <input type="file" id="attachment" onChange={handleFileUpload} />
+        </div>
+
+        <div className="flex justify-content-between mt-3">
+          <Button label="Cancel" icon="pi pi-times" className="p-button-danger" outlined onClick={() => setEmailDialogVisible(false)} />
+          <Button label="Send Email" icon="pi pi-check" className="p-button-success" outlined onClick={handleSendEmail} />
         </div>
       </Dialog>
     </div>

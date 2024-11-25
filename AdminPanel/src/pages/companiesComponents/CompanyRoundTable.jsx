@@ -10,6 +10,7 @@ import { Toast } from 'primereact/toast';
 import { useRef } from 'react';
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
+import "../../../node_modules/primeflex/primeflex.css";
 
 const CompanyRoundTable = ({ companyId }) => {
     const [rounds, setRounds] = useState([]);
